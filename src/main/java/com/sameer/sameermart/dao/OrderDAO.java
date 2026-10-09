@@ -5,6 +5,9 @@ import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.OrderItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.SellerOrderItem;
+import com.sameer.sameermart.model.TopSellingProduct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -14,9 +17,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OrderDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderDAO.class);
 
     // =====================================================
     // 1. CREATE ORDER FROM CART (TRANSACTIONAL)
@@ -525,6 +532,134 @@ public class OrderDAO {
         }
 
         return 0;
+    }
+
+    public int getSellerUnitsSold(int sellerId) {
+        String sql = """
+                SELECT SUM(oi.quantity) AS total_units
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE p.seller_id = ?
+                """;
+
+        try (
+                Connection connection = DatabaseConfig.getDataSource().getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, sellerId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total_units");
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error calculating units sold for seller: {}", sellerId, e);
+        }
+        return 0;
+    }
+
+    public Map<String, Integer> getSellerOrdersByStatus(int sellerId) {
+        Map<String, Integer> statusCounts = new LinkedHashMap<>();
+        statusCounts.put("PENDING", 0);
+        statusCounts.put("CONFIRMED", 0);
+        statusCounts.put("SHIPPED", 0);
+        statusCounts.put("DELIVERED", 0);
+        statusCounts.put("CANCELLED", 0);
+
+        String sql = """
+                SELECT o.status, COUNT(DISTINCT o.id) AS status_count
+                FROM orders o
+                JOIN order_items oi ON o.id = oi.order_id
+                JOIN products p ON oi.product_id = p.id
+                WHERE p.seller_id = ?
+                GROUP BY o.status
+                """;
+
+        try (
+                Connection connection = DatabaseConfig.getDataSource().getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, sellerId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    String status = rs.getString("status");
+                    int count = rs.getInt("status_count");
+                    if (status != null) {
+                        statusCounts.put(status.toUpperCase(), count);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting orders by status for seller: {}", sellerId, e);
+        }
+        return statusCounts;
+    }
+
+    public List<TopSellingProduct> getTopSellingProducts(int sellerId, int limit) {
+        List<TopSellingProduct> topProducts = new ArrayList<>();
+        String sql = """
+                SELECT p.id, p.name,
+                       SUM(oi.quantity) AS units_sold,
+                       SUM(oi.quantity * oi.price) AS total_sales
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE p.seller_id = ?
+                GROUP BY p.id, p.name
+                ORDER BY units_sold DESC
+                LIMIT ?
+                """;
+
+        try (
+                Connection connection = DatabaseConfig.getDataSource().getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, sellerId);
+            statement.setInt(2, limit > 0 ? limit : 5);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    topProducts.add(new TopSellingProduct(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getInt("units_sold"),
+                            rs.getBigDecimal("total_sales")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching top selling products for seller: {}", sellerId, e);
+        }
+        return topProducts;
+    }
+
+    public Map<String, BigDecimal> getSellerSalesByCategory(int sellerId) {
+        Map<String, BigDecimal> categorySales = new LinkedHashMap<>();
+        String sql = """
+                SELECT p.category, SUM(oi.quantity * oi.price) AS category_revenue
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE p.seller_id = ?
+                GROUP BY p.category
+                ORDER BY category_revenue DESC
+                """;
+
+        try (
+                Connection connection = DatabaseConfig.getDataSource().getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, sellerId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    String cat = rs.getString("category");
+                    BigDecimal rev = rs.getBigDecimal("category_revenue");
+                    if (cat != null) {
+                        categorySales.put(cat, rev != null ? rev : BigDecimal.ZERO);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching category sales for seller: {}", sellerId, e);
+        }
+        return categorySales;
     }
 
     // =====================================================

@@ -7,6 +7,8 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.math.BigDecimal" %>
+<%@ page import="com.sameer.sameermart.model.TopSellingProduct" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="com.sameer.sameermart.util.HtmlUtil" %>
 <%@ page import="com.sameer.sameermart.util.CsrfUtil" %>
 
@@ -56,6 +58,9 @@
     OrderDAO orderDAO = new OrderDAO();
     int totalSellerOrders = orderDAO.getSellerTotalOrders(user.getId());
     BigDecimal totalSellerRevenue = orderDAO.getSellerRevenue(user.getId());
+    int totalSellerUnitsSold = orderDAO.getSellerUnitsSold(user.getId());
+    Map<String, Integer> ordersByStatus = orderDAO.getSellerOrdersByStatus(user.getId());
+    List<TopSellingProduct> topProducts = orderDAO.getTopSellingProducts(user.getId(), 5);
 %>
 
 <!DOCTYPE html>
@@ -127,6 +132,12 @@
                 </div>
 
                 <div class="seller-stat-card">
+                    <div class="seller-stat-label">Units Sold</div>
+                    <div class="seller-stat-value"><%= totalSellerUnitsSold %></div>
+                    <div class="seller-stat-hint">Items purchased by buyers</div>
+                </div>
+
+                <div class="seller-stat-card">
                     <div class="seller-stat-label">Customer Orders</div>
                     <div class="seller-stat-value"><%= totalSellerOrders %></div>
                     <div class="seller-stat-hint">Orders containing your products</div>
@@ -138,6 +149,77 @@
                     <div class="seller-stat-hint">Total earnings from sales</div>
                 </div>
             </div>
+
+            <!-- Sales Analytics & Visualizations (Option O3) -->
+            <section class="seller-section" style="margin-top: 2rem;">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">SALES INTELLIGENCE</span>
+                        <h2>Sales Analytics & Performance (Option O3)</h2>
+                        <p>Live order lifecycle breakdowns and top-performing merchandise.</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Order Status Breakdown Chart -->
+                    <div class="products-panel" style="padding: 1.5rem; background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Orders by Status</h3>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Distribution of customer order states</p>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Selling Products Chart -->
+                    <div class="products-panel" style="padding: 1.5rem; background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Top Products by Units Sold</h3>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Highest velocity items in catalog</p>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products Leaderboard Table -->
+                <div class="products-panel" style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; margin-bottom: 2rem;">
+                    <div class="products-panel-header">
+                        <div>
+                            <h3>Top-Selling Products Leaderboard</h3>
+                            <p>Revenue and quantity sold per product</p>
+                        </div>
+                    </div>
+
+                    <% if (topProducts == null || topProducts.isEmpty()) { %>
+                        <div class="empty-state" style="padding: 2rem;">
+                            <p>No product sales recorded yet. Once customer orders are placed, sales rankings appear here.</p>
+                        </div>
+                    <% } else { %>
+                        <div class="products-table-wrapper">
+                            <table class="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Product Name</th>
+                                        <th>Units Sold</th>
+                                        <th style="text-align: right;">Total Sales (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% int rank = 1;
+                                       for (TopSellingProduct tp : topProducts) { %>
+                                        <tr>
+                                            <td><strong>#<%= rank++ %></strong></td>
+                                            <td><strong><%= HtmlUtil.escape(tp.getProductName()) %></strong></td>
+                                            <td><span class="status-badge" style="background: #e6f9ed; color: #1e7e34; border: 1px solid #1e7e34;"><%= tp.getUnitsSold() %> units</span></td>
+                                            <td style="text-align: right;"><strong>₹<%= tp.getTotalRevenue() %></strong></td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } %>
+                </div>
+            </section>
 
             <!-- Product Section Header & Quick Add Button -->
             <section class="seller-section">
@@ -277,6 +359,92 @@
     <footer class="footer">
         <p>© 2026 SameerMart. All rights reserved.</p>
     </footer>
+
+    <!-- Chart.js Visualization Scripts (Option O3) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Order Status Breakdown Chart
+            var statusCanvas = document.getElementById('orderStatusChart');
+            if (statusCanvas && typeof Chart !== 'undefined') {
+                new Chart(statusCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'],
+                        datasets: [{
+                            data: [
+                                <%= ordersByStatus != null ? ordersByStatus.getOrDefault("PENDING", 0) : 0 %>,
+                                <%= ordersByStatus != null ? ordersByStatus.getOrDefault("CONFIRMED", 0) : 0 %>,
+                                <%= ordersByStatus != null ? ordersByStatus.getOrDefault("SHIPPED", 0) : 0 %>,
+                                <%= ordersByStatus != null ? ordersByStatus.getOrDefault("DELIVERED", 0) : 0 %>,
+                                <%= ordersByStatus != null ? ordersByStatus.getOrDefault("CANCELLED", 0) : 0 %>
+                            ],
+                            backgroundColor: ['#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c'],
+                            borderWidth: 2,
+                            borderColor: '#000'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { family: 'Courier New, monospace', weight: 'bold', size: 11 },
+                                    color: '#000'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Top Products Bar Chart
+            var topCanvas = document.getElementById('topProductsChart');
+            if (topCanvas && typeof Chart !== 'undefined') {
+                new Chart(topCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            <% if (topProducts != null) {
+                                for (int i = 0; i < topProducts.size(); i++) { %>
+                                '<%= HtmlUtil.escape(topProducts.get(i).getProductName()).replace("'", "\\'") %>'<%= (i < topProducts.size() - 1) ? "," : "" %>
+                            <% } } %>
+                        ],
+                        datasets: [{
+                            label: 'Units Sold',
+                            data: [
+                                <% if (topProducts != null) {
+                                    for (int i = 0; i < topProducts.size(); i++) { %>
+                                    <%= topProducts.get(i).getUnitsSold() %><%= (i < topProducts.size() - 1) ? "," : "" %>
+                                <% } } %>
+                            ],
+                            backgroundColor: '#000',
+                            borderColor: '#000',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0, font: { family: 'Courier New, monospace', weight: 'bold' } }
+                            },
+                            x: {
+                                ticks: { font: { family: 'Courier New, monospace', weight: 'bold' } }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

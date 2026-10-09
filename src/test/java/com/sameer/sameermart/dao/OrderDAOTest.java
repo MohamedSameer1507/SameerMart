@@ -5,6 +5,7 @@ import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.OrderItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.SellerOrderItem;
+import com.sameer.sameermart.model.TopSellingProduct;
 import com.sameer.sameermart.model.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -215,5 +217,98 @@ public class OrderDAOTest {
 
         int totalOrders = orderDAO.getPlatformTotalOrders();
         assertTrue(totalOrders >= 0);
+    }
+
+    @Test
+    public void testSellerUnitsSoldAndSalesSummary() throws Exception {
+        String prefix = UUID.randomUUID().toString().substring(0, 8);
+        userDAO.registerUser(new User("Seller Metric", "smet_" + prefix + "@test.com", "pass", "SELLER"));
+        userDAO.registerUser(new User("Buyer Metric", "bmet_" + prefix + "@test.com", "pass", "BUYER"));
+
+        User s = userDAO.findByEmail("smet_" + prefix + "@test.com");
+        User b = userDAO.findByEmail("bmet_" + prefix + "@test.com");
+
+        productDAO.addProduct(new Product(s.getId(), "Item Alpha", "desc", "Books", new BigDecimal("50.00"), 50));
+        Product p = productDAO.findBySellerId(s.getId()).get(0);
+
+        cartDAO.addItem(b.getId(), p.getId(), 4);
+        orderDAO.createOrderFromCart(b.getId());
+
+        int unitsSold = orderDAO.getSellerUnitsSold(s.getId());
+        assertEquals(4, unitsSold);
+
+        BigDecimal revenue = orderDAO.getSellerRevenue(s.getId());
+        assertEquals(0, new BigDecimal("200.00").compareTo(revenue));
+    }
+
+    @Test
+    public void testSellerOrdersByStatus() throws Exception {
+        String prefix = UUID.randomUUID().toString().substring(0, 8);
+        userDAO.registerUser(new User("Seller Stat", "sstat_" + prefix + "@test.com", "pass", "SELLER"));
+        userDAO.registerUser(new User("Buyer Stat", "bstat_" + prefix + "@test.com", "pass", "BUYER"));
+
+        User s = userDAO.findByEmail("sstat_" + prefix + "@test.com");
+        User b = userDAO.findByEmail("bstat_" + prefix + "@test.com");
+
+        productDAO.addProduct(new Product(s.getId(), "Item Stat", "desc", "Gadgets", new BigDecimal("100.00"), 20));
+        Product p = productDAO.findBySellerId(s.getId()).get(0);
+
+        cartDAO.addItem(b.getId(), p.getId(), 2);
+        Order o = orderDAO.createOrderFromCart(b.getId());
+
+        Map<String, Integer> statusMap = orderDAO.getSellerOrdersByStatus(s.getId());
+        assertNotNull(statusMap);
+        assertTrue(statusMap.containsKey("CONFIRMED"));
+        assertTrue(statusMap.get("CONFIRMED") >= 1);
+    }
+
+    @Test
+    public void testTopSellingProducts() throws Exception {
+        String prefix = UUID.randomUUID().toString().substring(0, 8);
+        userDAO.registerUser(new User("Seller Top", "stop_" + prefix + "@test.com", "pass", "SELLER"));
+        userDAO.registerUser(new User("Buyer Top", "btop_" + prefix + "@test.com", "pass", "BUYER"));
+
+        User s = userDAO.findByEmail("stop_" + prefix + "@test.com");
+        User b = userDAO.findByEmail("btop_" + prefix + "@test.com");
+
+        productDAO.addProduct(new Product(s.getId(), "Product High", "desc", "Electronics", new BigDecimal("100.00"), 50));
+        productDAO.addProduct(new Product(s.getId(), "Product Low", "desc", "Electronics", new BigDecimal("20.00"), 50));
+
+        List<Product> prods = productDAO.findBySellerId(s.getId());
+        Product pHigh = prods.stream().filter(pr -> pr.getName().equals("Product High")).findFirst().orElseThrow();
+        Product pLow = prods.stream().filter(pr -> pr.getName().equals("Product Low")).findFirst().orElseThrow();
+
+        cartDAO.addItem(b.getId(), pHigh.getId(), 10);
+        orderDAO.createOrderFromCart(b.getId());
+
+        cartDAO.addItem(b.getId(), pLow.getId(), 2);
+        orderDAO.createOrderFromCart(b.getId());
+
+        List<TopSellingProduct> top = orderDAO.getTopSellingProducts(s.getId(), 5);
+        assertNotNull(top);
+        assertFalse(top.isEmpty());
+        assertEquals("Product High", top.get(0).getProductName());
+        assertEquals(10, top.get(0).getUnitsSold());
+    }
+
+    @Test
+    public void testSellerSalesByCategory() throws Exception {
+        String prefix = UUID.randomUUID().toString().substring(0, 8);
+        userDAO.registerUser(new User("Seller Cat", "scat_" + prefix + "@test.com", "pass", "SELLER"));
+        userDAO.registerUser(new User("Buyer Cat", "bcat_" + prefix + "@test.com", "pass", "BUYER"));
+
+        User s = userDAO.findByEmail("scat_" + prefix + "@test.com");
+        User b = userDAO.findByEmail("bcat_" + prefix + "@test.com");
+
+        productDAO.addProduct(new Product(s.getId(), "Book One", "desc", "Stationery", new BigDecimal("15.00"), 50));
+        Product p = productDAO.findBySellerId(s.getId()).get(0);
+
+        cartDAO.addItem(b.getId(), p.getId(), 3);
+        orderDAO.createOrderFromCart(b.getId());
+
+        Map<String, BigDecimal> catSales = orderDAO.getSellerSalesByCategory(s.getId());
+        assertNotNull(catSales);
+        assertTrue(catSales.containsKey("Stationery"));
+        assertEquals(0, new BigDecimal("45.00").compareTo(catSales.get("Stationery")));
     }
 }
