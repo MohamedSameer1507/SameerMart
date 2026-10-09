@@ -111,16 +111,20 @@ public class ChatServlet extends HttpServlet {
     }
 
     private String readRequestBody(HttpServletRequest request) {
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = request.getReader()) {
+        try {
+            BufferedReader reader = request.getReader();
+            if (reader == null) {
+                return null;
+            }
+            StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-        } catch (Exception e) {
+            return sb.toString();
+        } catch (IOException e) {
             return null;
         }
-        return sb.toString();
     }
 
     private void sendJsonResponse(HttpServletResponse response, int statusCode, ApiResponse<?> body)

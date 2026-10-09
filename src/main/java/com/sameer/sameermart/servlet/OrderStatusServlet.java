@@ -124,8 +124,12 @@ public class OrderStatusServlet extends HttpServlet {
     }
 
     public static boolean isValidStatusTransition(String current, String target) {
-        if (current == null || target == null) return false;
-        if (current.equalsIgnoreCase(target)) return true;
+        if (current == null || target == null) {
+            return false;
+        }
+        if (current.equalsIgnoreCase(target)) {
+            return true;
+        }
 
         return switch (current) {
             case "PENDING" -> "CONFIRMED".equals(target) || "CANCELLED".equals(target);

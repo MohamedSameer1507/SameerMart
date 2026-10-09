@@ -18,6 +18,8 @@ import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -124,7 +126,8 @@ public class EditProductServlet extends HttpServlet {
                 || priceText == null || priceText.trim().isEmpty()
                 || quantityText == null || quantityText.trim().isEmpty()) {
 
-            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + idText + "&error=Please+fill+all+required+fields");
+            String safeId = URLEncoder.encode(idText != null ? idText.trim() : "", StandardCharsets.UTF_8);
+            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + safeId + "&error=Please+fill+all+required+fields");
             return;
         }
 
@@ -180,37 +183,39 @@ public class EditProductServlet extends HttpServlet {
         try {
             Part filePart = request.getPart("image");
             if (filePart != null && filePart.getSize() > 0) {
-                String submittedName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                if (submittedName != null && !submittedName.trim().isEmpty()) {
-                    String extension = "";
-                    int dotIndex = submittedName.lastIndexOf('.');
-                    if (dotIndex >= 0) {
-                        extension = submittedName.substring(dotIndex).toLowerCase();
-                    }
-
-                    if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
-                        String uniqueFileName = UUID.randomUUID().toString() + extension;
-                        File uploadDir = new File(DatabaseConfig.getUploadDir());
-                        if (!uploadDir.isAbsolute()) {
-                            uploadDir = uploadDir.getAbsoluteFile();
-                        }
-                        if (!uploadDir.exists()) {
-                            uploadDir.mkdirs();
+                String rawFileName = filePart.getSubmittedFileName();
+                if (rawFileName != null && !rawFileName.trim().isEmpty()) {
+                    java.nio.file.Path submittedPath = Paths.get(rawFileName).getFileName();
+                    String submittedName = (submittedPath != null) ? submittedPath.toString() : null;
+                    if (submittedName != null && !submittedName.trim().isEmpty()) {
+                        String extension = "";
+                        int dotIndex = submittedName.lastIndexOf('.');
+                        if (dotIndex >= 0) {
+                            extension = submittedName.substring(dotIndex).toLowerCase();
                         }
 
-                        File targetFile = new File(uploadDir, uniqueFileName);
-                        if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
-                            try (java.io.InputStream in = filePart.getInputStream()) {
-                                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
+                            String uniqueFileName = UUID.randomUUID().toString() + extension;
+                            File uploadDir = new File(DatabaseConfig.getUploadDir());
+                            if (!uploadDir.isAbsolute()) {
+                                uploadDir = uploadDir.getAbsoluteFile();
                             }
-                            oldImageToDelete = imageUrl;
-                            imageUrl = uniqueFileName;
-                            newImageUploaded = true;
+                            Files.createDirectories(uploadDir.toPath());
+
+                            File targetFile = new File(uploadDir, uniqueFileName);
+                            if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
+                                try (java.io.InputStream in = filePart.getInputStream()) {
+                                    Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                }
+                                oldImageToDelete = imageUrl;
+                                imageUrl = uniqueFileName;
+                                newImageUploaded = true;
+                            }
                         }
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException | ServletException e) {
             System.err.println("Error processing edit product image upload: " + e.getMessage());
         }
 

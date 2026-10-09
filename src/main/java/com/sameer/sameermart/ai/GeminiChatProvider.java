@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sameer.sameermart.util.JsonUtil;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -120,7 +121,10 @@ public class GeminiChatProvider implements ChatProvider {
             // Fallback on non-200, 429, or unexpected response format
             return fallbackProvider.getReply(userMessage, context);
 
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return fallbackProvider.getReply(userMessage, context);
+        } catch (IOException | RuntimeException e) {
             // Log without revealing API key or sensitive data, then fallback safely
             return fallbackProvider.getReply(userMessage, context);
         }

@@ -1,22 +1,17 @@
 package com.sameer.sameermart.servlet;
 
 import com.sameer.sameermart.config.DatabaseConfig;
-import com.sameer.sameermart.util.HtmlUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Serves product photos back to the browser.
@@ -251,12 +246,13 @@ public class ProductImageServlet extends HttpServlet {
             HttpServletResponse response
     ) throws IOException {
 
+        Path fileNamePath = file.getFileName();
+        String fileName = (fileNamePath != null) ? fileNamePath.toString() : "";
+
         sendStream(
                 response,
                 Files.newInputStream(file),
-                contentTypeFor(
-                        file.getFileName().toString()
-                )
+                contentTypeFor(fileName)
         );
     }
 

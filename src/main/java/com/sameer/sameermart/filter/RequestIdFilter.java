@@ -37,7 +37,16 @@ public class RequestIdFilter implements Filter {
             requestId = httpRequest.getHeader(HEADER_NAME);
         }
 
-        if (requestId == null || requestId.trim().isEmpty()) {
+        if (requestId != null) {
+            String trimmed = requestId.trim();
+            if (trimmed.matches("^[A-Za-z0-9_-]{1,64}$")) {
+                requestId = trimmed;
+            } else {
+                requestId = null;
+            }
+        }
+
+        if (requestId == null) {
             requestId = UUID.randomUUID().toString();
         }
 
