@@ -4,14 +4,18 @@ import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.dao.ProductDAO;
 import com.sameer.sameermart.dao.UserDAO;
 import com.sameer.sameermart.model.User;
+import com.sameer.sameermart.util.CsrfUtil;
 import com.sameer.sameermart.util.HtmlUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.sql.Connection;
 import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class SecurityTest {
 
@@ -94,5 +98,67 @@ public class SecurityTest {
         assertTrue(userDAO.verifyPassword(password, saved.getPassword()));
         // Plain text should never equal hash
         assertNotEquals(password, saved.getPassword());
+    }
+
+    @Test
+    public void testCsrfConstantTimeComparison() {
+        String token = CsrfUtil.generateToken();
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
+
+        // Identical tokens must match
+        assertTrue(CsrfUtil.constantTimeEquals(token, token));
+        assertTrue(CsrfUtil.constantTimeEquals(token, new String(token)));
+
+        // Mismatched tokens must fail
+        assertFalse(CsrfUtil.constantTimeEquals(token, "tampered-token-value"));
+        assertFalse(CsrfUtil.constantTimeEquals(token, token + "x"));
+
+        // Null checks
+        assertFalse(CsrfUtil.constantTimeEquals(null, token));
+        assertFalse(CsrfUtil.constantTimeEquals(token, null));
+        assertFalse(CsrfUtil.constantTimeEquals(null, null));
+    }
+
+    @Test
+    public void testCsrfValidationWorkflow() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpSession session = mock(HttpSession.class);
+
+        // Scenario 1: No session present
+        when(request.getSession(false)).thenReturn(null);
+        assertFalse(CsrfUtil.isValid(request));
+
+        // Scenario 2: Session exists but has no token stored
+        when(request.getSession(false)).thenReturn(session);
+        when(session.getAttribute("csrfToken")).thenReturn(null);
+        assertFalse(CsrfUtil.isValid(request));
+
+        // Scenario 3: Session has token, but request has no submitted token
+        String validToken = CsrfUtil.generateToken();
+        when(session.getAttribute("csrfToken")).thenReturn(validToken);
+        when(request.getParameter("csrfToken")).thenReturn(null);
+        assertFalse(CsrfUtil.isValid(request));
+
+        // Scenario 4: Request submits wrong / tampered token
+        when(request.getParameter("csrfToken")).thenReturn("forged-csrf-token");
+        assertFalse(CsrfUtil.isValid(request));
+
+        // Scenario 5: Request submits matching valid token
+        when(request.getParameter("csrfToken")).thenReturn(validToken);
+        assertTrue(CsrfUtil.isValid(request));
+    }
+
+    @Test
+    public void testCsrfTokenUniquenessAndEntropy() {
+        String token1 = CsrfUtil.generateToken();
+        String token2 = CsrfUtil.generateToken();
+        assertNotNull(token1);
+        assertNotNull(token2);
+        assertNotEquals(token1, token2, "Subsequent CSRF tokens must be cryptographically distinct");
+
+        // Token must be URL-safe Base64 of 32 bytes (around 43 characters without padding)
+        assertTrue(token1.length() >= 40, "Token should be at least 40 characters of Base64");
+        assertTrue(token1.matches("^[A-Za-z0-9_-]+$"), "Token must be URL-safe characters");
     }
 }

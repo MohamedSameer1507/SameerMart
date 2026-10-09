@@ -11,15 +11,59 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final long LOCKOUT_DURATION_MS = 5 * 60 * 1000L; // 5 minutes
+
+    // Rate limiter: client key (IP + ":" + email) -> deque of failed attempt timestamps
+    private final Map<String, Deque<Long>> failedAttempts = new ConcurrentHashMap<>();
 
     private UserDAO userDAO;
 
     @Override
     public void init() throws ServletException {
         userDAO = new UserDAO();
+    }
+
+    private synchronized boolean isLockedOut(String key) {
+        long now = System.currentTimeMillis();
+        Deque<Long> attempts = failedAttempts.get(key);
+        if (attempts == null) {
+            return false;
+        }
+
+        while (!attempts.isEmpty() && (now - attempts.peekFirst() > LOCKOUT_DURATION_MS)) {
+            attempts.pollFirst();
+        }
+
+        return attempts.size() >= MAX_FAILED_ATTEMPTS;
+    }
+
+    private synchronized void recordFailedAttempt(String key) {
+        long now = System.currentTimeMillis();
+        Deque<Long> attempts = failedAttempts.computeIfAbsent(key, k -> new ArrayDeque<>());
+
+        while (!attempts.isEmpty() && (now - attempts.peekFirst() > LOCKOUT_DURATION_MS)) {
+            attempts.pollFirst();
+        }
+
+        attempts.addLast(now);
+    }
+
+    private synchronized void clearFailedAttempts(String key) {
+        failedAttempts.remove(key);
+    }
+
+    void resetAttempts() {
+        failedAttempts.clear();
     }
 
     @Override
@@ -61,6 +105,24 @@ public class LoginServlet extends HttpServlet {
 
         /*
          * -----------------------------
+         * RATE LIMITING (BRUTE FORCE DEFENSE)
+         * -----------------------------
+         */
+
+        String remoteIp = request.getRemoteAddr();
+        String clientIp = (remoteIp != null && !remoteIp.trim().isEmpty()) ? remoteIp.trim() : "127.0.0.1";
+        String attemptKey = clientIp + ":" + email.toLowerCase(Locale.ROOT);
+
+        if (isLockedOut(attemptKey)) {
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/login.jsp?error=Too+many+failed+login+attempts.+Please+try+again+in+5+minutes."
+            );
+            return;
+        }
+
+        /*
+         * -----------------------------
          * FIND USER
          * -----------------------------
          */
@@ -68,6 +130,7 @@ public class LoginServlet extends HttpServlet {
         User user = userDAO.findByEmail(email);
 
         if (user == null) {
+            recordFailedAttempt(attemptKey);
 
             response.sendRedirect(
                     request.getContextPath()
@@ -90,6 +153,7 @@ public class LoginServlet extends HttpServlet {
                 );
 
         if (!passwordCorrect) {
+            recordFailedAttempt(attemptKey);
 
             response.sendRedirect(
                     request.getContextPath()
@@ -98,6 +162,9 @@ public class LoginServlet extends HttpServlet {
 
             return;
         }
+
+        // Authentication succeeded — reset failed attempts for this client key
+        clearFailedAttempts(attemptKey);
 
         /*
          * -----------------------------
