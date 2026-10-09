@@ -19,7 +19,7 @@ public class DatabaseConfig {
                 : System.getProperty("db.user", "sa");
         String password = System.getenv("DB_PASSWORD") != null 
                 ? System.getenv("DB_PASSWORD") 
-                : System.getProperty("db.password", "WE");
+                : System.getProperty("db.password", "");
 
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(username);
