@@ -1,0 +1,83 @@
+flowchart LR
+    %% Actors
+    Buyer["fa:fa-user Buyer"]
+    Seller["fa:fa-briefcase Seller"]
+    Admin["fa:fa-shield-alt Administrator"]
+    Visitor["fa:fa-globe Anonymous Visitor"]
+
+    subgraph System["SameerMart Platform Boundary"]
+        subgraph F1["F1: Authentication & Account"]
+            UC_Reg(["Register Account (Buyer/Seller)"])
+            UC_Login(["Login (BCrypt Auth)"])
+            UC_Logout(["Logout & Invalidate Session"])
+        end
+
+        subgraph F2["F2 & Chatbot: Browsing & Discovery"]
+            UC_Browse(["Browse Active Products & Categories"])
+            UC_Search(["Search Catalog by Keyword"])
+            UC_ViewProduct(["View Product Details & Ratings"])
+            UC_Chatbot(["Ask AI Support Chatbot (Gemini / FAQ)"])
+        end
+
+        subgraph F3_F6["F3 & F6: Seller Operations"]
+            UC_AddProduct(["Add Product with External Photo (F3)"])
+            UC_EditProduct(["Edit Product & Update Stock (F3)"])
+            UC_DeleteProduct(["Delete / Deactivate Product (F3)"])
+            UC_ViewSellerOrders(["View Customer Orders & Revenue (F6)"])
+            UC_UpdateOrderStatus(["Advance Order Status: Shipped/Delivered (O2)"])
+        end
+
+        subgraph F4_F5["F4 & F5: Cart & Checkout"]
+            UC_AddToCart(["Add Product to Shopping Cart (F4)"])
+            UC_ManageCart(["Update Quantities & Remove Items (F4)"])
+            UC_Checkout(["Checkout & Atomic Order Creation (F5)"])
+            UC_ViewOrders(["View Order History & Receipts (F5)"])
+        end
+
+        subgraph F7["F7: Administrator Operations"]
+            UC_AdminDash(["View Platform Metrics & Revenues"])
+            UC_ModerateProducts(["Moderate & Toggle Product Active Status"])
+            UC_AdminOrders(["Review All Orders Across Platform"])
+        end
+
+        subgraph F8["F8: Product Reviews"]
+            UC_WriteReview(["Submit 1-5 Star Review (DELIVERED Only)"])
+        end
+    end
+
+    %% Visitor relationships
+    Visitor --> UC_Reg
+    Visitor --> UC_Login
+    Visitor --> UC_Browse
+    Visitor --> UC_Search
+    Visitor --> UC_ViewProduct
+    Visitor --> UC_Chatbot
+
+    %% Buyer relationships
+    Buyer --> UC_Login
+    Buyer --> UC_Logout
+    Buyer --> UC_Browse
+    Buyer --> UC_Search
+    Buyer --> UC_ViewProduct
+    Buyer --> UC_Chatbot
+    Buyer --> UC_AddToCart
+    Buyer --> UC_ManageCart
+    Buyer --> UC_Checkout
+    Buyer --> UC_ViewOrders
+    Buyer --> UC_WriteReview
+
+    %% Seller relationships
+    Seller --> UC_Login
+    Seller --> UC_Logout
+    Seller --> UC_AddProduct
+    Seller --> UC_EditProduct
+    Seller --> UC_DeleteProduct
+    Seller --> UC_ViewSellerOrders
+    Seller --> UC_UpdateOrderStatus
+
+    %% Admin relationships
+    Admin --> UC_Login
+    Admin --> UC_Logout
+    Admin --> UC_AdminDash
+    Admin --> UC_ModerateProducts
+    Admin --> UC_AdminOrders

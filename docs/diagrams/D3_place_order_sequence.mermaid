@@ -1,0 +1,54 @@
+sequenceDiagram
+    autonumber
+    actor Buyer as Buyer Browser
+    participant Filter as AuthFilter & CsrfUtil
+    participant OS as OrderServlet
+    participant ODAO as OrderDAO
+    participant DB as HikariCP / Database (H2 or Postgres)
+
+    Buyer->>OS: POST /buyer/order (csrfToken)
+    activate OS
+    OS->>Filter: Validate Session & CSRF Token
+    alt Invalid Session or CSRF
+        Filter-->>Buyer: 401 Unauthorized / 403 Forbidden
+    else Validated
+        Filter-->>OS: Token Validated
+        OS->>ODAO: createOrderFromCart(buyerId)
+        activate ODAO
+
+        ODAO->>DB: getConnection() & setAutoCommit(false)
+        ODAO->>DB: SELECT cart_id, product_id, quantity, price FROM cart_items JOIN products
+        DB-->>ODAO: Return cart items list
+
+        alt Cart is Empty
+            ODAO-->>OS: Throw IllegalStateException("Cart is empty")
+            OS-->>Buyer: Redirect /buyer/cart?error=Cart+is+empty
+        else Cart Has Items
+            loop For Each Cart Item
+                ODAO->>DB: SELECT quantity FROM products WHERE id = ?
+                DB-->>ODAO: Current stock level
+                alt Insufficient Stock
+                    ODAO->>DB: connection.rollback()
+                    ODAO-->>OS: Throw IllegalStateException("Insufficient stock for ...")
+                    OS-->>Buyer: Redirect /buyer/cart?error=Insufficient+stock
+                end
+            end
+
+            ODAO->>DB: INSERT INTO orders (buyer_id, total_amount, status) VALUES (?, ?, 'CONFIRMED')
+            DB-->>ODAO: Generated orderId
+
+            loop For Each Cart Item
+                ODAO->>DB: INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)
+                ODAO->>DB: UPDATE products SET quantity = quantity - ? WHERE id = ?
+            end
+
+            ODAO->>DB: DELETE FROM cart_items WHERE cart_id = ?
+            ODAO->>DB: connection.commit()
+            DB-->>ODAO: Transaction Committed
+            ODAO-->>OS: Return Order (orderId, totalAmount, CONFIRMED)
+            deactivate ODAO
+
+            OS-->>Buyer: 302 Redirect /buyer/order-success?orderId={id}
+        end
+    end
+    deactivate OS
