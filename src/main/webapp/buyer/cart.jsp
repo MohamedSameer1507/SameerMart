@@ -47,6 +47,7 @@
     <title>My Shopping Cart - SameerMart</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828_4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css">
 </head>
 <body>
 
@@ -243,5 +244,6 @@
         <p>© 2026 SameerMart. All rights reserved.</p>
     </footer>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>
