@@ -342,6 +342,59 @@ public class ProductDAO {
         return products;
     }
 
+    public List<Product> findAllActive() {
+        return findAllAvailable();
+    }
+
+    public List<Product> findByCategory(String category) {
+        List<Product> products = new ArrayList<>();
+        String sql = """
+                SELECT id, seller_id, name, description, category, price, quantity, image_url, active, created_at
+                FROM products
+                WHERE category = ? AND active = TRUE AND quantity > 0
+                ORDER BY id DESC
+                """;
+        try (Connection connection = DatabaseConfig.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, category);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    products.add(mapProduct(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding products by category: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    public List<Product> searchProducts(String query) {
+        List<Product> products = new ArrayList<>();
+        String sql = """
+                SELECT id, seller_id, name, description, category, price, quantity, image_url, active, created_at
+                FROM products
+                WHERE (LOWER(name) LIKE ? OR LOWER(description) LIKE ?)
+                  AND active = TRUE AND quantity > 0
+                ORDER BY id DESC
+                """;
+        try (Connection connection = DatabaseConfig.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            String pattern = "%" + (query != null ? query.toLowerCase().trim() : "") + "%";
+            statement.setString(1, pattern);
+            statement.setString(2, pattern);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    products.add(mapProduct(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error searching products: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+
     // =========================================================
     // UPDATE PRODUCT
     // =========================================================
