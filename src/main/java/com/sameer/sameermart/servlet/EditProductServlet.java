@@ -1,0 +1,275 @@
+package com.sameer.sameermart.servlet;
+
+import com.sameer.sameermart.config.DatabaseConfig;
+import com.sameer.sameermart.dao.ProductDAO;
+import com.sameer.sameermart.model.Product;
+import com.sameer.sameermart.model.User;
+import com.sameer.sameermart.util.CsrfUtil;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
+@WebServlet("/seller/edit-product")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,       // 1MB
+        maxFileSize = 1024 * 1024 * 5,          // 5MB
+        maxRequestSize = 1024 * 1024 * 10       // 10MB
+)
+public class EditProductServlet extends HttpServlet {
+
+    private ProductDAO productDAO;
+
+    @Override
+    public void init() throws ServletException {
+        productDAO = new ProductDAO();
+    }
+
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Please+login+first");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null || !"SELLER".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Seller+access+required");
+            return;
+        }
+
+        String idText = request.getParameter("id");
+        if (idText == null || idText.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?error=Product+ID+required");
+            return;
+        }
+
+        int id;
+        try {
+            id = Integer.parseInt(idText.trim());
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?error=Invalid+Product+ID");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        Product product = productDAO.findByIdAndSellerId(id, user.getId());
+
+        if (product == null) {
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?error=Product+not+found+or+unauthorized");
+            return;
+        }
+
+        request.setAttribute("product", product);
+        request.getRequestDispatcher("/seller/edit-product.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Please+login+first");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null || !"SELLER".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Seller+access+required");
+            return;
+        }
+
+        if (!CsrfUtil.isValid(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or missing CSRF token");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+
+        String idText = request.getParameter("id");
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        String category = request.getParameter("category");
+        String priceText = request.getParameter("price");
+        String quantityText = request.getParameter("quantity");
+        String currentImageUrl = request.getParameter("currentImageUrl");
+
+        if (idText == null || idText.trim().isEmpty()
+                || name == null || name.trim().isEmpty()
+                || category == null || category.trim().isEmpty()
+                || priceText == null || priceText.trim().isEmpty()
+                || quantityText == null || quantityText.trim().isEmpty()) {
+
+            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + idText + "&error=Please+fill+all+required+fields");
+            return;
+        }
+
+        if (name.trim().length() > 150
+                || category.trim().length() > 100
+                || (description != null && description.trim().length() > 1000)) {
+
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?error=Input+exceeds+maximum+length");
+            return;
+        }
+
+        int id;
+        BigDecimal price;
+        int quantity;
+
+        try {
+            id = Integer.parseInt(idText.trim());
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?error=Invalid+Product+ID");
+            return;
+        }
+
+        try {
+            price = new BigDecimal(priceText.trim());
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + id + "&error=Price+must+be+greater+than+zero");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + id + "&error=Invalid+price");
+            return;
+        }
+
+        try {
+            quantity = Integer.parseInt(quantityText.trim());
+            if (quantity <= 0) {
+                response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + id + "&error=Quantity+must+be+greater+than+zero");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + id + "&error=Invalid+quantity");
+            return;
+        }
+
+        String imageUrl = (currentImageUrl != null && !currentImageUrl.trim().isEmpty())
+                ? currentImageUrl.trim()
+                : "default-product.svg";
+
+        String oldImageToDelete = null;
+        boolean newImageUploaded = false;
+
+        // Check if a new photo is uploaded
+        try {
+            Part filePart = request.getPart("image");
+            if (filePart != null && filePart.getSize() > 0) {
+                String submittedName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                if (submittedName != null && !submittedName.trim().isEmpty()) {
+                    String extension = "";
+                    int dotIndex = submittedName.lastIndexOf('.');
+                    if (dotIndex >= 0) {
+                        extension = submittedName.substring(dotIndex).toLowerCase();
+                    }
+
+                    if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
+                        String uniqueFileName = UUID.randomUUID().toString() + extension;
+                        File uploadDir = new File(DatabaseConfig.getUploadDir());
+                        if (!uploadDir.isAbsolute()) {
+                            uploadDir = uploadDir.getAbsoluteFile();
+                        }
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+
+                        File targetFile = new File(uploadDir, uniqueFileName);
+                        if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
+                            try (java.io.InputStream in = filePart.getInputStream()) {
+                                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
+                            oldImageToDelete = imageUrl;
+                            imageUrl = uniqueFileName;
+                            newImageUploaded = true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing edit product image upload: " + e.getMessage());
+        }
+
+        Product product = new Product(
+                id,
+                user.getId(),
+                name.trim(),
+                description == null ? "" : description.trim(),
+                category.trim(),
+                price,
+                quantity,
+                imageUrl
+        );
+
+        boolean updated = productDAO.updateProduct(product);
+
+        if (updated) {
+            if (newImageUploaded && oldImageToDelete != null && !oldImageToDelete.equals(imageUrl)) {
+                deleteOldImageIfSafe(oldImageToDelete);
+            }
+            response.sendRedirect(request.getContextPath() + "/seller/dashboard.jsp?success=Product+updated+successfully");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/seller/edit-product?id=" + id + "&error=Unable+to+update+product");
+        }
+    }
+
+    static void deleteOldImageIfSafe(String oldImageName) {
+        if (oldImageName == null || oldImageName.trim().isEmpty()) {
+            return;
+        }
+        String name = oldImageName.trim();
+        // Never delete default or bundled images
+        if (name.equalsIgnoreCase("default-product.svg")
+                || name.toLowerCase().startsWith("default-")
+                || !name.matches("^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$")) {
+            return;
+        }
+
+        File uploadDir = new File(DatabaseConfig.getUploadDir());
+        if (!uploadDir.isAbsolute()) {
+            uploadDir = uploadDir.getAbsoluteFile();
+        }
+
+        File oldFile = new File(uploadDir, name);
+        try {
+            if (!uploadDir.exists()) {
+                return;
+            }
+            Path basePath = uploadDir.toPath().toRealPath();
+            Path oldPath = oldFile.toPath().normalize();
+            if (Files.exists(oldPath)) {
+                Path realOldPath = oldPath.toRealPath();
+                // Ensure old file is strictly within uploadDir and not the directory itself
+                if (realOldPath.startsWith(basePath) && !realOldPath.equals(basePath)) {
+                    Files.deleteIfExists(realOldPath);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not safely delete old product image: " + e.getMessage());
+        }
+    }
+}

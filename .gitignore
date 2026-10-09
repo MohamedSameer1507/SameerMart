@@ -1,11 +1,18 @@
-HELP.md
 target/
-/data/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### SmartTomcat (local IDE Tomcat config) ###
+.smarttomcat/
+
+### Eclipse ###
 .apt_generated
 .classpath
 .factorypath
@@ -13,12 +20,6 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,3 +33,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Local runtime DB ###
+data/
+*.db
+*.mv.db
+*.trace.db
+*.lock.db
+
+### Local secrets and binaries ###
+cloudflared.exe
+.env
+config.properties
+
+### Runtime logs ###
+logs/

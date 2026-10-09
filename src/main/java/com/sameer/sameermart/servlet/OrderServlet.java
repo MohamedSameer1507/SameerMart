@@ -1,0 +1,141 @@
+package com.sameer.sameermart.servlet;
+
+import com.sameer.sameermart.dao.CartDAO;
+import com.sameer.sameermart.dao.OrderDAO;
+import com.sameer.sameermart.model.CartItem;
+import com.sameer.sameermart.model.Order;
+import com.sameer.sameermart.model.User;
+import com.sameer.sameermart.util.CsrfUtil;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+@WebServlet({"/buyer/checkout", "/buyer/orders", "/buyer/order", "/buyer/place-order", "/OrderServlet"})
+public class OrderServlet extends HttpServlet {
+
+    private OrderDAO orderDAO;
+    private CartDAO cartDAO;
+
+    @Override
+    public void init() throws ServletException {
+        orderDAO = new OrderDAO();
+        cartDAO = new CartDAO();
+    }
+
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Please+login+first");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null || !"BUYER".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Buyer+access+required");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String uri = request.getRequestURI();
+
+        if (uri.endsWith("/orders")) {
+            List<Order> orders = orderDAO.findOrdersByBuyerId(user.getId());
+            request.setAttribute("orders", orders);
+            request.getRequestDispatcher("/buyer/orders.jsp").forward(request, response);
+            return;
+        }
+
+        if (uri.endsWith("/order")) {
+            String idText = request.getParameter("id");
+            if (idText == null || idText.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/buyer/orders?error=Order+ID+required");
+                return;
+            }
+
+            int orderId;
+            try {
+                orderId = Integer.parseInt(idText.trim());
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/buyer/orders?error=Invalid+Order+ID");
+                return;
+            }
+
+            Order order = orderDAO.findOrderById(orderId, user.getId());
+            if (order == null) {
+                response.sendRedirect(request.getContextPath() + "/buyer/orders?error=Order+not+found+or+unauthorized");
+                return;
+            }
+
+            request.setAttribute("order", order);
+            request.getRequestDispatcher("/buyer/order-details.jsp").forward(request, response);
+            return;
+        }
+
+        // Default to Checkout view
+        List<CartItem> cartItems = cartDAO.getCartItems(user.getId());
+        if (cartItems == null || cartItems.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/buyer/cart?error=Your+cart+is+empty");
+            return;
+        }
+
+        BigDecimal cartTotal = cartDAO.getCartTotal(user.getId());
+        request.setAttribute("cartItems", cartItems);
+        request.setAttribute("cartTotal", cartTotal);
+
+        request.getRequestDispatcher("/buyer/checkout.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Please+login+first");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+        if (role == null || !"BUYER".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=Buyer+access+required");
+            return;
+        }
+
+        if (!CsrfUtil.isValid(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or missing CSRF token");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+
+        try {
+            Order order = orderDAO.createOrderFromCart(user.getId());
+            response.sendRedirect(request.getContextPath() + "/buyer/order-success.jsp?orderId=" + order.getId() + "&success=Order+placed+successfully");
+        } catch (IllegalStateException e) {
+            String safeMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            response.sendRedirect(request.getContextPath() + "/buyer/cart?error=" + safeMsg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/buyer/cart?error=Unable+to+place+order.+Please+try+again.");
+        }
+    }
+}

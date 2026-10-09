@@ -1,0 +1,315 @@
+package com.sameer.sameermart.servlet;
+
+import com.sameer.sameermart.config.DatabaseConfig;
+import com.sameer.sameermart.dao.ProductDAO;
+import com.sameer.sameermart.model.Product;
+import com.sameer.sameermart.model.User;
+import com.sameer.sameermart.util.CsrfUtil;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+@WebServlet("/seller/add-product")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,       // 1MB
+        maxFileSize = 1024 * 1024 * 5,          // 5MB
+        maxRequestSize = 1024 * 1024 * 10       // 10MB
+)
+public class AddProductServlet extends HttpServlet {
+
+    private ProductDAO productDAO;
+
+    @Override
+    public void init() throws ServletException {
+        productDAO = new ProductDAO();
+    }
+
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        response.sendRedirect(
+                request.getContextPath()
+                        + "/seller/add-product.jsp"
+        );
+    }
+
+    @Override
+    protected void doPost(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException, IOException {
+
+        // =========================
+        // CSRF CHECK
+        // =========================
+
+        if (!CsrfUtil.isValid(request)) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Invalid+or+missing+CSRF+token"
+            );
+
+            return;
+        }
+
+        HttpSession session = request.getSession(false);
+
+        // =========================
+        // SESSION CHECK
+        // =========================
+
+        if (session == null
+                || session.getAttribute("user") == null) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/login.jsp?error=Please+login+first"
+            );
+
+            return;
+        }
+
+        String role =
+                (String) session.getAttribute("role");
+
+        if (role == null
+                || !"SELLER".equalsIgnoreCase(role)) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/login.jsp?error=Seller+access+required"
+            );
+
+            return;
+        }
+
+        // =========================
+        // CSRF CHECK
+        // =========================
+
+        if (!CsrfUtil.isValid(request)) {
+
+            response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "Invalid or missing CSRF token"
+            );
+
+            return;
+        }
+
+        User user =
+                (User) session.getAttribute("user");
+
+        // =========================
+        // FORM VALUES
+        // =========================
+
+        String name =
+                request.getParameter("name");
+
+        String description =
+                request.getParameter("description");
+
+        String category =
+                request.getParameter("category");
+
+        String priceText =
+                request.getParameter("price");
+
+        String quantityText =
+                request.getParameter("quantity");
+
+        // =========================
+        // BASIC VALIDATION
+        // =========================
+
+        if (name == null
+                || name.trim().isEmpty()
+                || category == null
+                || category.trim().isEmpty()
+                || priceText == null
+                || priceText.trim().isEmpty()
+                || quantityText == null
+                || quantityText.trim().isEmpty()) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Please+fill+all+required+fields"
+            );
+
+            return;
+        }
+
+        if (name.trim().length() > 150
+                || category.trim().length() > 100
+                || (description != null && description.trim().length() > 1000)) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Input+exceeds+maximum+length"
+            );
+
+            return;
+        }
+
+        BigDecimal price;
+        int quantity;
+
+        // =========================
+        // PRICE VALIDATION
+        // =========================
+
+        try {
+
+            price = new BigDecimal(
+                    priceText.trim()
+            );
+
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+
+                response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Price+must+be+greater+than+zero"
+                );
+
+                return;
+            }
+
+        } catch (NumberFormatException e) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Invalid+price"
+            );
+
+            return;
+        }
+
+        // =========================
+        // QUANTITY VALIDATION
+        // =========================
+
+        try {
+
+            quantity =
+                    Integer.parseInt(
+                            quantityText.trim()
+                    );
+
+            if (quantity <= 0) {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                                + "/seller/add-product.jsp?error=Quantity+must+be+greater+than+zero"
+                );
+
+                return;
+            }
+
+        } catch (NumberFormatException e) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Invalid+quantity"
+            );
+
+            return;
+        }
+
+        // =========================
+        // IMAGE UPLOAD HANDLING
+        // =========================
+
+        String imageUrl = "default-product.svg";
+
+        try {
+            Part filePart = request.getPart("image");
+            if (filePart != null && filePart.getSize() > 0) {
+                String submittedName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                if (submittedName != null && !submittedName.trim().isEmpty()) {
+                    String extension = "";
+                    int dotIndex = submittedName.lastIndexOf('.');
+                    if (dotIndex >= 0) {
+                        extension = submittedName.substring(dotIndex).toLowerCase();
+                    }
+
+                    if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
+                        String uniqueFileName = UUID.randomUUID().toString() + extension;
+                        File uploadDir = new File(DatabaseConfig.getUploadDir());
+                        if (!uploadDir.isAbsolute()) {
+                            uploadDir = uploadDir.getAbsoluteFile();
+                        }
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+
+                        File targetFile = new File(uploadDir, uniqueFileName);
+                        if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
+                            try (java.io.InputStream in = filePart.getInputStream()) {
+                                java.nio.file.Files.copy(in, targetFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            }
+                            imageUrl = uniqueFileName;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing product image upload: " + e.getMessage());
+        }
+
+        // =========================
+        // CREATE PRODUCT
+        // =========================
+
+        Product product =
+                new Product(
+                        user.getId(),
+                        name.trim(),
+                        description == null
+                                ? ""
+                                : description.trim(),
+                        category.trim(),
+                        price,
+                        quantity,
+                        imageUrl
+                );
+
+        // =========================
+        // SAVE PRODUCT
+        // =========================
+
+        boolean added =
+                productDAO.addProduct(product);
+
+        if (added) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/dashboard.jsp?success=Product+added+successfully"
+            );
+
+        } else {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/seller/add-product.jsp?error=Unable+to+add+product"
+            );
+        }
+    }
+}
