@@ -1,9 +1,12 @@
 package com.sameer.sameermart.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BusinessRuleTest {
 
@@ -13,7 +16,7 @@ public class BusinessRuleTest {
         int quantity = 3;
         BigDecimal expectedSubtotal = unitPrice.multiply(BigDecimal.valueOf(quantity)); // 149.97
 
-        Assert.assertEquals(new BigDecimal("149.97"), expectedSubtotal);
+        assertEquals(new BigDecimal("149.97"), expectedSubtotal);
     }
 
     @Test
@@ -22,17 +25,17 @@ public class BusinessRuleTest {
         int purchasedQty = 7;
         int remainingStock = initialStock - purchasedQty;
 
-        Assert.assertEquals(18, remainingStock);
-        Assert.assertTrue("Remaining stock must not be negative", remainingStock >= 0);
+        assertEquals(18, remainingStock);
+        assertTrue(remainingStock >= 0, "Remaining stock must not be negative");
     }
 
     @Test
     public void testProductActiveStateDefault() {
         Product p = new Product(1, "Organic Oats", "Healthy", "Grains", new BigDecimal("75.00"), 20);
-        Assert.assertTrue("New product must be active by default", p.isActive());
+        assertTrue(p.isActive(), "New product must be active by default");
 
         p.setActive(false);
-        Assert.assertFalse("Product can be explicitly deactivated", p.isActive());
+        assertFalse(p.isActive(), "Product can be explicitly deactivated");
     }
 
     @Test
@@ -41,21 +44,21 @@ public class BusinessRuleTest {
         User seller = new User("Bob", "bob@example.com", "hash", "SELLER");
         User admin = new User("Charlie", "admin@example.com", "hash", "ADMIN");
 
-        Assert.assertEquals("BUYER", buyer.getRole());
-        Assert.assertEquals("SELLER", seller.getRole());
-        Assert.assertEquals("ADMIN", admin.getRole());
+        assertEquals("BUYER", buyer.getRole());
+        assertEquals("SELLER", seller.getRole());
+        assertEquals("ADMIN", admin.getRole());
     }
 
     @Test
     public void testCartItemBoundaryValues() {
         CartItem item = new CartItem();
         item.setQuantity(1);
-        Assert.assertEquals(1, item.getQuantity());
+        assertEquals(1, item.getQuantity());
 
         item.setProductId(101);
-        Assert.assertEquals(101, item.getProductId());
+        assertEquals(101, item.getProductId());
 
         item.setBuyerId(5);
-        Assert.assertEquals(5, item.getBuyerId());
+        assertEquals(5, item.getBuyerId());
     }
 }

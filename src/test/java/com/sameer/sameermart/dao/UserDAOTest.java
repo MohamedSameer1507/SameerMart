@@ -2,20 +2,21 @@ package com.sameer.sameermart.dao;
 
 import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class UserDAOTest {
 
     private static UserDAO userDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         try (Connection conn = DatabaseConfig.getDataSource().getConnection();
@@ -37,15 +38,15 @@ public class UserDAOTest {
         String email = "reg_" + UUID.randomUUID().toString().substring(0, 8) + "@test.com";
         User user = new User("Alice Tester", email, "password123", "BUYER");
         boolean created = userDAO.registerUser(user);
-        Assert.assertTrue("Registration should succeed", created);
+        assertTrue(created, "Registration should succeed");
 
         User found = userDAO.findByEmail(email);
-        Assert.assertNotNull("User should be found by email", found);
-        Assert.assertEquals("Alice Tester", found.getName());
-        Assert.assertEquals(email, found.getEmail());
-        Assert.assertEquals("BUYER", found.getRole());
-        Assert.assertTrue("Password should be BCrypt hashed",
-                found.getPassword().startsWith("$2a$") || found.getPassword().startsWith("$2b$"));
+        assertNotNull(found, "User should be found by email");
+        assertEquals("Alice Tester", found.getName());
+        assertEquals(email, found.getEmail());
+        assertEquals("BUYER", found.getRole());
+        assertTrue(found.getPassword().startsWith("$2a$") || found.getPassword().startsWith("$2b$"),
+                "Password should be BCrypt hashed");
     }
 
     @Test
@@ -53,11 +54,11 @@ public class UserDAOTest {
         String email = "dup_" + UUID.randomUUID().toString().substring(0, 8) + "@test.com";
         User user1 = new User("First User", email, "pass1", "SELLER");
         boolean first = userDAO.registerUser(user1);
-        Assert.assertTrue(first);
+        assertTrue(first);
 
         User user2 = new User("Second User", email, "pass2", "BUYER");
         boolean second = userDAO.registerUser(user2);
-        Assert.assertFalse("Duplicate email registration must fail due to unique constraint", second);
+        assertFalse(second, "Duplicate email registration must fail due to unique constraint");
     }
 
     @Test
@@ -67,23 +68,23 @@ public class UserDAOTest {
         userDAO.registerUser(user);
 
         User byEmail = userDAO.findByEmail(email);
-        Assert.assertNotNull(byEmail);
-        Assert.assertTrue(byEmail.getId() > 0);
+        assertNotNull(byEmail);
+        assertTrue(byEmail.getId() > 0);
 
         User byId = userDAO.findById(byEmail.getId());
-        Assert.assertNotNull("User should be found by ID", byId);
-        Assert.assertEquals(byEmail.getId(), byId.getId());
-        Assert.assertEquals("Bob ById", byId.getName());
-        Assert.assertEquals(email, byId.getEmail());
+        assertNotNull(byId, "User should be found by ID");
+        assertEquals(byEmail.getId(), byId.getId());
+        assertEquals("Bob ById", byId.getName());
+        assertEquals(email, byId.getEmail());
     }
 
     @Test
     public void testFindByNonExistentEmailAndIdReturnsNull() {
         User notFoundEmail = userDAO.findByEmail("non_existent_99999@domain.org");
-        Assert.assertNull("Non-existent email should return null", notFoundEmail);
+        assertNull(notFoundEmail, "Non-existent email should return null");
 
         User notFoundId = userDAO.findById(-9999);
-        Assert.assertNull("Negative ID should return null", notFoundId);
+        assertNull(notFoundId, "Negative ID should return null");
     }
 
     @Test
@@ -94,21 +95,21 @@ public class UserDAOTest {
         userDAO.registerUser(user);
 
         User stored = userDAO.findByEmail(email);
-        Assert.assertNotNull(stored);
+        assertNotNull(stored);
 
         // Positive check
-        Assert.assertTrue("Valid password should verify",
-                userDAO.verifyPassword(rawPassword, stored.getPassword()));
+        assertTrue(userDAO.verifyPassword(rawPassword, stored.getPassword()),
+                "Valid password should verify");
 
         // Negative check
-        Assert.assertFalse("Wrong password should fail verification",
-                userDAO.verifyPassword("WrongPass", stored.getPassword()));
+        assertFalse(userDAO.verifyPassword("WrongPass", stored.getPassword()),
+                "Wrong password should fail verification");
 
         // Null checks
-        Assert.assertFalse("Null entered password should return false",
-                userDAO.verifyPassword(null, stored.getPassword()));
-        Assert.assertFalse("Null stored password should return false",
-                userDAO.verifyPassword(rawPassword, null));
+        assertFalse(userDAO.verifyPassword(null, stored.getPassword()),
+                "Null entered password should return false");
+        assertFalse(userDAO.verifyPassword(rawPassword, null),
+                "Null stored password should return false");
     }
 
     @Test
@@ -120,6 +121,6 @@ public class UserDAOTest {
         userDAO.registerUser(new User("FindAll User", email, "pass", "BUYER"));
 
         List<User> updatedUsers = userDAO.findAll();
-        Assert.assertEquals(initialCount + 1, updatedUsers.size());
+        assertEquals(initialCount + 1, updatedUsers.size());
     }
 }

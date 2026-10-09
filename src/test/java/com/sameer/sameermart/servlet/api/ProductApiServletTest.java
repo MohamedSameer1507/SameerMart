@@ -2,9 +2,8 @@ package com.sameer.sameermart.servlet.api;
 
 import com.sameer.sameermart.dao.ProductDAO;
 import com.sameer.sameermart.model.Product;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +12,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class ProductApiServletTest {
@@ -23,7 +23,7 @@ public class ProductApiServletTest {
     private HttpServletResponse response;
     private StringWriter responseWriter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new ProductApiServlet();
         mockProductDAO = mock(ProductDAO.class);
@@ -48,8 +48,8 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("Honey"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("Honey"));
     }
 
     @Test
@@ -64,8 +64,8 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("Phone"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("Phone"));
     }
 
     @Test
@@ -81,8 +81,8 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("Cotton Shirt"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("Cotton Shirt"));
     }
 
     @Test
@@ -96,8 +96,8 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("Book"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("Book"));
     }
 
     @Test
@@ -109,8 +109,8 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":false"));
-        Assert.assertTrue(json.contains("NOT_FOUND"));
+        assertTrue(json.contains("\"success\":false"));
+        assertTrue(json.contains("NOT_FOUND"));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ProductApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":false"));
-        Assert.assertTrue(json.contains("INVALID_ID"));
+        assertTrue(json.contains("\"success\":false"));
+        assertTrue(json.contains("INVALID_ID"));
     }
 }

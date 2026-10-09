@@ -4,9 +4,8 @@ import com.sameer.sameermart.dao.CartDAO;
 import com.sameer.sameermart.model.CartItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +15,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class CartApiServletTest {
@@ -27,7 +27,7 @@ public class CartApiServletTest {
     private HttpSession session;
     private StringWriter responseWriter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new CartApiServlet();
         mockCartDAO = mock(CartDAO.class);
@@ -50,8 +50,8 @@ public class CartApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":false"));
-        Assert.assertTrue(json.contains("UNAUTHORIZED"));
+        assertTrue(json.contains("\"success\":false"));
+        assertTrue(json.contains("UNAUTHORIZED"));
     }
 
     @Test
@@ -65,8 +65,8 @@ public class CartApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":false"));
-        Assert.assertTrue(json.contains("FORBIDDEN"));
+        assertTrue(json.contains("\"success\":false"));
+        assertTrue(json.contains("FORBIDDEN"));
     }
 
     @Test
@@ -84,8 +84,8 @@ public class CartApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("\"totalAmount\":300.00"));
-        Assert.assertTrue(json.contains("\"totalQuantity\":2"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("\"totalAmount\":300.00"));
+        assertTrue(json.contains("\"totalQuantity\":2"));
     }
 }

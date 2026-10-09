@@ -4,15 +4,16 @@ import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.CartItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CartDAOTest {
 
@@ -22,7 +23,7 @@ public class CartDAOTest {
     private static User seller;
     private static User buyer;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -88,11 +89,11 @@ public class CartDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(created);
+        assertNotNull(created);
 
         // Add 3 units
         boolean added = cartDAO.addItem(buyer.getId(), created.getId(), 3);
-        Assert.assertTrue(added);
+        assertTrue(added);
 
         List<CartItem> items = cartDAO.getCartItems(buyer.getId());
         CartItem cartItem = null;
@@ -102,12 +103,12 @@ public class CartDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(cartItem);
-        Assert.assertEquals(3, cartItem.getQuantity());
+        assertNotNull(cartItem);
+        assertEquals(3, cartItem.getQuantity());
 
         // Add 2 more units (accumulates to 5)
         boolean addedMore = cartDAO.addItem(buyer.getId(), created.getId(), 2);
-        Assert.assertTrue(addedMore);
+        assertTrue(addedMore);
 
         items = cartDAO.getCartItems(buyer.getId());
         for (CartItem ci : items) {
@@ -116,7 +117,7 @@ public class CartDAOTest {
                 break;
             }
         }
-        Assert.assertEquals(5, cartItem.getQuantity());
+        assertEquals(5, cartItem.getQuantity());
         cartDAO.removeItem(buyer.getId(), created.getId());
     }
 
@@ -132,17 +133,17 @@ public class CartDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(created);
+        assertNotNull(created);
 
         // Attempt to add 6 when only 5 exist
         boolean addedExcess = cartDAO.addItem(buyer.getId(), created.getId(), 6);
-        Assert.assertFalse("Adding more than available stock should fail", addedExcess);
+        assertFalse(addedExcess, "Adding more than available stock should fail");
 
         // Invalid inputs
-        Assert.assertFalse(cartDAO.addItem(-1, created.getId(), 1));
-        Assert.assertFalse(cartDAO.addItem(buyer.getId(), -1, 1));
-        Assert.assertFalse(cartDAO.addItem(buyer.getId(), created.getId(), 0));
-        Assert.assertFalse(cartDAO.addItem(buyer.getId(), created.getId(), -5));
+        assertFalse(cartDAO.addItem(-1, created.getId(), 1));
+        assertFalse(cartDAO.addItem(buyer.getId(), -1, 1));
+        assertFalse(cartDAO.addItem(buyer.getId(), created.getId(), 0));
+        assertFalse(cartDAO.addItem(buyer.getId(), created.getId(), -5));
     }
 
     @Test
@@ -157,31 +158,31 @@ public class CartDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(created);
+        assertNotNull(created);
 
         cartDAO.addItem(buyer.getId(), created.getId(), 2);
 
         // Update quantity to 4
         boolean updated = cartDAO.updateQuantity(buyer.getId(), created.getId(), 4);
-        Assert.assertTrue(updated);
+        assertTrue(updated);
 
         // Update beyond stock (15 > 10)
         boolean updateBeyond = cartDAO.updateQuantity(buyer.getId(), created.getId(), 15);
-        Assert.assertFalse("Updating quantity beyond available stock should fail", updateBeyond);
+        assertFalse(updateBeyond, "Updating quantity beyond available stock should fail");
 
         // Update to 0 should remove item
         boolean updateZero = cartDAO.updateQuantity(buyer.getId(), created.getId(), 0);
-        Assert.assertTrue(updateZero);
+        assertTrue(updateZero);
 
         List<CartItem> items = cartDAO.getCartItems(buyer.getId());
         for (CartItem ci : items) {
-            Assert.assertNotEquals(created.getId(), ci.getProductId());
+            assertNotEquals(created.getId(), ci.getProductId());
         }
 
         // Direct removeItem
         cartDAO.addItem(buyer.getId(), created.getId(), 1);
         boolean removed = cartDAO.removeItem(buyer.getId(), created.getId());
-        Assert.assertTrue(removed);
+        assertTrue(removed);
     }
 
     @Test
@@ -197,21 +198,21 @@ public class CartDAOTest {
             if ("Prod 1".equals(p.getName())) item1 = p;
             if ("Prod 2".equals(p.getName())) item2 = p;
         }
-        Assert.assertNotNull(item1);
-        Assert.assertNotNull(item2);
+        assertNotNull(item1);
+        assertNotNull(item2);
 
         cartDAO.clearCart(buyer.getId());
-        Assert.assertEquals(BigDecimal.ZERO, cartDAO.getCartTotal(buyer.getId()));
+        assertEquals(BigDecimal.ZERO, cartDAO.getCartTotal(buyer.getId()));
 
         cartDAO.addItem(buyer.getId(), item1.getId(), 2); // 201.00
         cartDAO.addItem(buyer.getId(), item2.getId(), 4); // 101.00
         // Total should be 302.00
-        Assert.assertEquals(new BigDecimal("302.00"), cartDAO.getCartTotal(buyer.getId()));
+        assertEquals(new BigDecimal("302.00"), cartDAO.getCartTotal(buyer.getId()));
 
         // Clear cart
         boolean cleared = cartDAO.clearCart(buyer.getId());
-        Assert.assertTrue(cleared);
-        Assert.assertTrue(cartDAO.getCartItems(buyer.getId()).isEmpty());
-        Assert.assertEquals(BigDecimal.ZERO, cartDAO.getCartTotal(buyer.getId()));
+        assertTrue(cleared);
+        assertTrue(cartDAO.getCartItems(buyer.getId()).isEmpty());
+        assertEquals(BigDecimal.ZERO, cartDAO.getCartTotal(buyer.getId()));
     }
 }

@@ -6,14 +6,14 @@ import com.sameer.sameermart.exception.ResourceNotFoundException;
 import com.sameer.sameermart.exception.UnauthorizedException;
 import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class OrderServiceTest {
@@ -21,7 +21,7 @@ public class OrderServiceTest {
     private OrderDAO mockOrderDAO;
     private OrderService orderService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockOrderDAO = mock(OrderDAO.class);
         orderService = new OrderServiceImpl(mockOrderDAO);
@@ -33,15 +33,15 @@ public class OrderServiceTest {
         when(mockOrderDAO.createOrderFromCart(5)).thenReturn(order);
 
         Order result = orderService.placeOrderFromCart(5);
-        Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.getId());
+        assertNotNull(result);
+        assertEquals(1, result.getId());
     }
 
     @Test
     public void testGetBuyerOrders() {
         when(mockOrderDAO.findOrdersByBuyerId(5)).thenReturn(List.of(new Order()));
         List<Order> orders = orderService.getBuyerOrders(5);
-        Assert.assertEquals(1, orders.size());
+        assertEquals(1, orders.size());
     }
 
     @Test
@@ -59,16 +59,16 @@ public class OrderServiceTest {
         verify(mockOrderDAO).updateOrderStatus(10, "SHIPPED");
     }
 
-    @Test(expected = UnauthorizedException.class)
+    @Test
     public void testUpdateOrderStatusBuyerThrowsUnauthorized() {
         User buyer = new User();
         buyer.setId(5);
         buyer.setRole("BUYER");
 
-        orderService.updateOrderStatus(10, "SHIPPED", buyer);
+        assertThrows(UnauthorizedException.class, () -> orderService.updateOrderStatus(10, "SHIPPED", buyer));
     }
 
-    @Test(expected = ConflictException.class)
+    @Test
     public void testUpdateOrderStatusInvalidTransitionThrowsConflict() {
         User seller = new User();
         seller.setId(20);
@@ -78,16 +78,16 @@ public class OrderServiceTest {
         when(mockOrderDAO.findOrderById(10)).thenReturn(order);
         when(mockOrderDAO.isSellerForOrder(20, 10)).thenReturn(true);
 
-        orderService.updateOrderStatus(10, "PENDING", seller);
+        assertThrows(ConflictException.class, () -> orderService.updateOrderStatus(10, "PENDING", seller));
     }
 
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void testUpdateOrderStatusNotFoundThrowsException() {
         User admin = new User();
         admin.setId(1);
         admin.setRole("ADMIN");
 
         when(mockOrderDAO.findOrderById(99)).thenReturn(null);
-        orderService.updateOrderStatus(99, "DELIVERED", admin);
+        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrderStatus(99, "DELIVERED", admin));
     }
 }

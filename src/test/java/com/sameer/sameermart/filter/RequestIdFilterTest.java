@@ -1,15 +1,15 @@
 package com.sameer.sameermart.filter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,7 +22,7 @@ public class RequestIdFilterTest {
     private HttpServletResponse response;
     private FilterChain chain;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         filter = new RequestIdFilter();
         request = mock(HttpServletRequest.class);

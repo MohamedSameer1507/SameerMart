@@ -3,8 +3,8 @@ package com.sameer.sameermart.servlet;
 import com.sameer.sameermart.dao.ProductDAO;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class EditProductServletTest {
     private HttpSession session;
     private RequestDispatcher dispatcher;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new EditProductServlet();
         mockProductDAO = mock(ProductDAO.class);

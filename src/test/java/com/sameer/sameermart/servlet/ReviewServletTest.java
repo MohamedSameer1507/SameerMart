@@ -5,8 +5,8 @@ import com.sameer.sameermart.dao.ReviewDAO;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.Review;
 import com.sameer.sameermart.model.User;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +28,7 @@ public class ReviewServletTest {
 
     private static final User BUYER = new User(10, "Buyer", "b@test.com", "pass", "BUYER");
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new ReviewServlet();
         mockReviewDAO = mock(ReviewDAO.class);

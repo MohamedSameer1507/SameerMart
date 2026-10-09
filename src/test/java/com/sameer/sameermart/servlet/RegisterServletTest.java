@@ -2,8 +2,8 @@ package com.sameer.sameermart.servlet;
 
 import com.sameer.sameermart.dao.UserDAO;
 import com.sameer.sameermart.model.User;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +18,7 @@ public class RegisterServletTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new RegisterServlet();
         mockUserDAO = mock(UserDAO.class);

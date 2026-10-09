@@ -1,8 +1,8 @@
 package com.sameer.sameermart.servlet;
 
 import com.sameer.sameermart.service.ChatService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -27,7 +27,7 @@ public class ChatServletTest {
     private HttpSession session;
     private StringWriter responseWriter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new ChatServlet();
         mockChatService = mock(ChatService.class);
