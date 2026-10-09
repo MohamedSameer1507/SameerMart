@@ -7,6 +7,7 @@
     <title>SameerMart - Modern Marketplace</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260824">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css">
     <style>
         /* Specific hero & grid layout for index page */
         .hero {
@@ -136,5 +137,6 @@
         </div>
     </main>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>
