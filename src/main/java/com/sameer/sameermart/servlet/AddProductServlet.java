@@ -241,35 +241,37 @@ public class AddProductServlet extends HttpServlet {
         try {
             Part filePart = request.getPart("image");
             if (filePart != null && filePart.getSize() > 0) {
-                String submittedName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                if (submittedName != null && !submittedName.trim().isEmpty()) {
-                    String extension = "";
-                    int dotIndex = submittedName.lastIndexOf('.');
-                    if (dotIndex >= 0) {
-                        extension = submittedName.substring(dotIndex).toLowerCase();
-                    }
-
-                    if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
-                        String uniqueFileName = UUID.randomUUID().toString() + extension;
-                        File uploadDir = new File(DatabaseConfig.getUploadDir());
-                        if (!uploadDir.isAbsolute()) {
-                            uploadDir = uploadDir.getAbsoluteFile();
-                        }
-                        if (!uploadDir.exists()) {
-                            uploadDir.mkdirs();
+                String rawFileName = filePart.getSubmittedFileName();
+                if (rawFileName != null && !rawFileName.trim().isEmpty()) {
+                    java.nio.file.Path submittedPath = Paths.get(rawFileName).getFileName();
+                    String submittedName = (submittedPath != null) ? submittedPath.toString() : null;
+                    if (submittedName != null && !submittedName.trim().isEmpty()) {
+                        String extension = "";
+                        int dotIndex = submittedName.lastIndexOf('.');
+                        if (dotIndex >= 0) {
+                            extension = submittedName.substring(dotIndex).toLowerCase();
                         }
 
-                        File targetFile = new File(uploadDir, uniqueFileName);
-                        if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
-                            try (java.io.InputStream in = filePart.getInputStream()) {
-                                java.nio.file.Files.copy(in, targetFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        if (extension.equals(".jpg") || extension.equals(".jpeg") || extension.equals(".png") || extension.equals(".webp") || extension.equals(".svg")) {
+                            String uniqueFileName = UUID.randomUUID().toString() + extension;
+                            File uploadDir = new File(DatabaseConfig.getUploadDir());
+                            if (!uploadDir.isAbsolute()) {
+                                uploadDir = uploadDir.getAbsoluteFile();
                             }
-                            imageUrl = uniqueFileName;
+                            java.nio.file.Files.createDirectories(uploadDir.toPath());
+
+                            File targetFile = new File(uploadDir, uniqueFileName);
+                            if (targetFile.toPath().normalize().startsWith(uploadDir.toPath().normalize())) {
+                                try (java.io.InputStream in = filePart.getInputStream()) {
+                                    java.nio.file.Files.copy(in, targetFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                }
+                                imageUrl = uniqueFileName;
+                            }
                         }
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException | ServletException e) {
             System.err.println("Error processing product image upload: " + e.getMessage());
         }
 

@@ -188,7 +188,7 @@ public class OrderDAO {
             order.setItems(orderItemsToCreate);
             return order;
 
-        } catch (Exception e) {
+        } catch (SQLException | RuntimeException e) {
             if (connection != null) {
                 try {
                     connection.rollback();

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Servlets inherit Serializable from HttpServlet; services/DAOs/Gson stored in servlets are not meant for serialization -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD,SE_NO_SUITABLE_CONSTRUCTOR_FOR_EXTERNALIZATION,SE_TRANSIENT_FIELD_NOT_RESTORED,SE_BAD_FIELD_STORE"/>
+    </Match>
+
+    <!-- Exclude representation exposure in models, services, DAOs, and factories (standard Java DTOs & DI) -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2,MS_EXPOSE_REP"/>
+    </Match>
+
+    <!-- Exclude test classes from SpotBugs analysis -->
+    <Match>
+        <Class name="~.*Test(\$.*)?$"/>
+    </Match>
+
+    <!-- RequestIdFilter sanitizes requestId via strict regex ^[A-Za-z0-9_-]{1,64}$ before echoing -->
+    <Match>
+        <Class name="com.sameer.sameermart.filter.RequestIdFilter"/>
+        <Method name="doFilter"/>
+        <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER"/>
+    </Match>
+</FindBugsFilter>

@@ -59,7 +59,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean isEmailTaken(String email) {
-        if (email == null) return false;
+        if (email == null) {
+            return false;
+        }
         return userDAO.findByEmail(email.trim()) != null;
     }
 }
