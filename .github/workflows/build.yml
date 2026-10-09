@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Build and Test
 
 on:
   push:
@@ -8,26 +8,32 @@ on:
 
 jobs:
   build:
-
+    name: Maven Verify (Java 17)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17 (Temurin)
+      - name: Set up OpenJDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: '17'
-          cache: maven
+          distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Build and run all tests with Maven
-        run: mvn --batch-mode --no-transfer-progress clean verify
+      - name: Build, Test, and Verify with Maven
+        run: mvn -B clean verify --file pom.xml
 
-      - name: Upload WAR artifact
+      - name: Archive Test Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: SameerMart.war
-          path: target/*.war
-        if: success()
+          name: surefire-reports
+          path: target/surefire-reports/
+          if-no-files-found: ignore
+
+      - name: Verify WAR Packaging
+        run: |
+          test -f target/SameerMart.war || { echo "WAR packaging failed!"; exit 1; }
+          echo "WAR artifact packaged successfully: target/SameerMart.war"
