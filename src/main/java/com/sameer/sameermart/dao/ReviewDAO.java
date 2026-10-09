@@ -14,7 +14,40 @@ import java.util.List;
 public class ReviewDAO {
 
     // =====================================================
-    // HAS THE BUYER PURCHASED THE PRODUCT?
+    // HAS THE BUYER PURCHASED THE PRODUCT (ANY STATUS)?
+    // =====================================================
+
+    public boolean hasAnyOrderForProduct(int buyerId, int productId) {
+        String sql = """
+                SELECT COUNT(*) AS purchase_count
+                FROM order_items oi
+                JOIN orders o ON oi.order_id = o.id
+                WHERE o.buyer_id = ?
+                  AND oi.product_id = ?
+                """;
+
+        try (
+                Connection connection =
+                        DatabaseConfig.getDataSource().getConnection();
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+            statement.setInt(1, buyerId);
+            statement.setInt(2, productId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("purchase_count") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking any purchase order: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // =====================================================
+    // HAS THE BUYER PURCHASED THE PRODUCT (DELIVERED STATUS)?
     // =====================================================
 
     public boolean hasPurchasedProduct(
@@ -28,6 +61,7 @@ public class ReviewDAO {
                 JOIN orders o ON oi.order_id = o.id
                 WHERE o.buyer_id = ?
                   AND oi.product_id = ?
+                  AND o.status = 'DELIVERED'
                 """;
 
         try (
@@ -153,9 +187,15 @@ public class ReviewDAO {
             );
         }
 
-        if (!hasPurchasedProduct(buyerId, productId)) {
+        if (!hasAnyOrderForProduct(buyerId, productId)) {
             throw new IllegalStateException(
                     "You must purchase this product before reviewing it."
+            );
+        }
+
+        if (!hasPurchasedProduct(buyerId, productId)) {
+            throw new IllegalStateException(
+                    "You can only review products from orders that have been DELIVERED."
             );
         }
 

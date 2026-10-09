@@ -101,7 +101,11 @@
                                     </div>
                                     <div>
                                         <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Status</span>
-                                        <span class="category-chip" style="background: #000; color: #fff; padding: 2px 8px;"><%= HtmlUtil.escape(order.getStatus()) %></span>
+                                        <%
+                                            String oStatus = order.getStatus() != null ? order.getStatus().trim().toUpperCase() : "CONFIRMED";
+                                            String oStatusClass = "status-" + oStatus.toLowerCase();
+                                        %>
+                                        <span class="status-badge <%= oStatusClass %>"><%= HtmlUtil.escape(oStatus) %></span>
                                     </div>
                                 </div>
                                 <div>
@@ -118,7 +122,8 @@
                                             <th>Product Name</th>
                                             <th>Unit Price</th>
                                             <th>Quantity</th>
-                                            <th style="text-align: right;">Subtotal</th>
+                                            <th>Subtotal</th>
+                                            <th style="text-align: right;">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -142,7 +147,16 @@
                                                 </td>
                                                 <td>₹<%= item.getPrice() %></td>
                                                 <td><%= item.getQuantity() %></td>
-                                                <td style="text-align: right;"><strong>₹<%= item.getSubtotal() %></strong></td>
+                                                <td><strong>₹<%= item.getSubtotal() %></strong></td>
+                                                <td style="text-align: right;">
+                                                    <% if ("DELIVERED".equalsIgnoreCase(oStatus)) { %>
+                                                        <a href="${pageContext.request.contextPath}/buyer/product-details?id=<%= item.getProductId() %>#reviews" class="btn-status-action btn-status-deliver">
+                                                            ★ Leave Review
+                                                        </a>
+                                                    <% } else { %>
+                                                        <span style="font-size: 0.72rem; color: #888;">Review after delivery</span>
+                                                    <% } %>
+                                                </td>
                                             </tr>
                                         <% }} %>
                                     </tbody>

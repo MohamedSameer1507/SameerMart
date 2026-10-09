@@ -40,6 +40,8 @@
     }
 
     SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a");
+    String success = request.getParameter("success");
+    String error = request.getParameter("error");
 %>
 
 <!DOCTYPE html>
@@ -70,6 +72,14 @@
     <!-- Main Content -->
     <main class="seller-page">
         <div class="seller-container">
+
+            <% if (success != null && !success.trim().isEmpty()) { %>
+                <div class="message success" style="margin-bottom: 1.5rem;"><%= HtmlUtil.escape(success) %></div>
+            <% } %>
+
+            <% if (error != null && !error.trim().isEmpty()) { %>
+                <div class="message error" style="margin-bottom: 1.5rem;"><%= HtmlUtil.escape(error) %></div>
+            <% } %>
 
             <section class="seller-header">
                 <div class="seller-introduction">
@@ -132,7 +142,8 @@
                                     <th>Qty</th>
                                     <th>Unit Price</th>
                                     <th>Subtotal</th>
-                                    <th style="text-align: right;">Status</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,6 +157,8 @@
                                         pImg = "default-product.svg";
                                     }
                                     String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
+                                    String itemStatus = item.getOrderStatus() != null ? item.getOrderStatus().trim().toUpperCase() : "CONFIRMED";
+                                    String statusClass = "status-" + itemStatus.toLowerCase();
                                 %>
                                     <tr>
                                         <td><strong>#<%= item.getOrderId() %></strong></td>
@@ -171,10 +184,47 @@
                                         <td><%= item.getQuantity() %></td>
                                         <td>₹<%= item.getPrice() %></td>
                                         <td><strong>₹<%= item.getSubtotal() %></strong></td>
-                                        <td style="text-align: right;">
-                                            <span class="status-badge" style="background: #000; color: #fff;">
-                                                <%= HtmlUtil.escape(item.getOrderStatus()) %>
+                                        <td>
+                                            <span class="status-badge <%= statusClass %>">
+                                                <%= HtmlUtil.escape(itemStatus) %>
                                             </span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div class="order-actions-cell">
+                                                <% if ("CONFIRMED".equals(itemStatus)) { %>
+                                                    <form action="${pageContext.request.contextPath}/seller/order-status" method="POST" style="margin: 0; display: inline;">
+                                                        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="orderId" value="<%= item.getOrderId() %>">
+                                                        <input type="hidden" name="status" value="SHIPPED">
+                                                        <button type="submit" class="btn-status-action btn-status-ship">Mark Shipped</button>
+                                                    </form>
+                                                    <form action="${pageContext.request.contextPath}/seller/order-status" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('Cancel order #<%= item.getOrderId() %>?');">
+                                                        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="orderId" value="<%= item.getOrderId() %>">
+                                                        <input type="hidden" name="status" value="CANCELLED">
+                                                        <button type="submit" class="btn-status-action btn-status-cancel">Cancel</button>
+                                                    </form>
+                                                <% } else if ("SHIPPED".equals(itemStatus)) { %>
+                                                    <form action="${pageContext.request.contextPath}/seller/order-status" method="POST" style="margin: 0; display: inline;">
+                                                        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="orderId" value="<%= item.getOrderId() %>">
+                                                        <input type="hidden" name="status" value="DELIVERED">
+                                                        <button type="submit" class="btn-status-action btn-status-deliver">Mark Delivered</button>
+                                                    </form>
+                                                    <form action="${pageContext.request.contextPath}/seller/order-status" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('Cancel order #<%= item.getOrderId() %>?');">
+                                                        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="orderId" value="<%= item.getOrderId() %>">
+                                                        <input type="hidden" name="status" value="CANCELLED">
+                                                        <button type="submit" class="btn-status-action btn-status-cancel">Cancel</button>
+                                                    </form>
+                                                <% } else if ("DELIVERED".equals(itemStatus)) { %>
+                                                    <span style="font-size: 0.75rem; color: #166534; font-weight: 700;">✓ Fulfilled</span>
+                                                <% } else if ("CANCELLED".equals(itemStatus)) { %>
+                                                    <span style="font-size: 0.75rem; color: #991b1b; font-weight: 700;">Cancelled</span>
+                                                <% } else { %>
+                                                    <span style="font-size: 0.75rem; color: #666;">-</span>
+                                                <% } %>
+                                            </div>
                                         </td>
                                     </tr>
                                 <% } %>
