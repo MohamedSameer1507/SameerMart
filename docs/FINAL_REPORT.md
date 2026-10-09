@@ -24,7 +24,7 @@ The system addresses critical challenges in electronic commerce:
 3. **Customer Support Automation**: Powered by an asynchronous AI assistant integrating Google Gemini Flash-Lite with automatic failover to an intent-matching rule engine.
 4. **Operational Observability**: Facilitated by correlation ID injection (`X-Request-Id`) across SLF4J MDC, Logback structured logging, and an active health probe endpoint.
 
-The platform was validated through a comprehensive suite of 153 automated unit and integration tests achieving 100% pass rates, confirming high functional reliability and strict compliance with the Anna University R2025 curriculum specification.
+The platform was validated through a comprehensive suite of 226 automated unit and integration tests achieving 100% pass rates across 36 test classes on JUnit 5 Jupiter, verified by Checkstyle (0 violations) and SpotBugs (0 bugs) static analysis, confirming high functional reliability and strict compliance with the Anna University R2025 curriculum specification.
 
 ---
 
@@ -121,8 +121,18 @@ SameerMart employs a Model-View-Controller (MVC) architectural pattern decoupled
 - **Rating Computation**: Auto-computed aggregate star ratings (1–5 scale) and review count dynamically shown on product cards and detail pages.
 - **Stored XSS Prevention**: Review text is sanitized before database storage and HTML-escaped during JSP rendering.
 
+### Extension O1: Buyer Wishlist
+- Allows buyers to bookmark products for future purchase. Backed by `wishlist` relational table, `WishlistDAO`, `WishlistService`, `WishlistServlet`, responsive Neo-Brutalist JSP UI, and 22 dedicated automated tests.
+
 ### Extension O2: Order Lifecycle Workflow
 - State machine governing order progression: Sellers advance orders from `CONFIRMED` &rarr; `SHIPPED` &rarr; `DELIVERED`. Illegal transitions trigger HTTP 409 Conflict responses.
+
+### Extension O3: Seller Sales Intelligence Dashboard
+- Interactive visual analytics dashboard for sellers powered by **Chart.js**:
+  - Live KPI cards: Total Revenue, Total Orders, Active Listings, Units Sold.
+  - Doughnut chart illustrating order fulfillment distribution (`PENDING`, `CONFIRMED`, `SHIPPED`, `DELIVERED`).
+  - Bar chart ranking top-selling products by units sold and generated revenue.
+  - Revenue aggregation grouped by product category.
 
 ### Extension AI: Conversational Support Assistant
 - Integrated AI assistant answering catalog inquiries, return policies, and shipping FAQs. Combines Google Gemini Flash-Lite with an offline intent matcher, rate limiting (10 queries/minute), and session-based CSRF protection.
@@ -135,23 +145,26 @@ SameerMart employs a Model-View-Controller (MVC) architectural pattern decoupled
 
 ## 4. EXPERIMENTAL TEST RESULTS & VERIFICATION
 
-Testing was conducted using JUnit 4, Mockito, and Surefire under Maven 3.9.9 and OpenJDK 17.
+Testing was conducted using **JUnit 5 Jupiter (5.10.2)**, Mockito (5.12.0), Surefire (3.2.5), Checkstyle (3.4.0), and SpotBugs (4.8.6.4) under Maven 3.9.9 and OpenJDK 17.
 
 ### Summary Test Metrics
 | Test Category | Test Class Count | Individual Tests | Passing | Failing | Execution Time |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **DAO Layer (H2 In-Memory)** | 6 | 62 | 62 | 0 | ~26.4 s |
-| **Filter & Security Layer** | 4 | 13 | 13 | 0 | ~4.8 s |
-| **Service Layer (AI & Chat)** | 2 | 11 | 11 | 0 | ~0.3 s |
-| **Servlet Controllers (Mocked)** | 11 | 67 | 67 | 0 | ~1.8 s |
-| **End-to-End Integration** | 1 | 6 | 6 | 0 | ~11.9 s |
-| **TOTAL** | **24** | **153** | **153** | **0** | **~52.8 s** |
+| **DAO Layer (H2 In-Memory & Mock AI)** | 7 | 44 | 44 | 0 | ~8.1 s |
+| **Domain Model & Business Rules** | 1 | 5 | 5 | 0 | ~0.0 s |
+| **Service Layer (Business Logic & Rate Limit)** | 7 | 44 | 44 | 0 | ~0.6 s |
+| **Security & Filter Layer** | 4 | 16 | 16 | 0 | ~0.9 s |
+| **Servlet Controllers & REST APIs** | 16 | 111 | 111 | 0 | ~1.4 s |
+| **End-to-End Integration Flow** | 1 | 6 | 6 | 0 | ~3.1 s |
+| **TOTAL** | **36** | **226** | **226** | **0** | **~22.2 s** |
 
 ### Verified Security Scenarios
-1. **CSRF Protection**: All POST operations without valid `csrfToken` returned HTTP 403 Forbidden with zero database mutation.
-2. **Access Control**: Buyers attempting to access `/seller/*` or `/admin/*` were intercepted and returned HTTP 403 Forbidden.
-3. **Order State Validation**: Out-of-order state transitions (e.g., `DELIVERED` &rarr; `CONFIRMED`) returned HTTP 409 Conflict.
-4. **Review Verification**: Attempting to review an unpurchased product or an undelivered order threw an `IllegalStateException` and rejected insertion.
+1. **CSRF Protection**: Cryptographic 32-byte `SecureRandom` tokens validated via constant-time comparison (`MessageDigest.isEqual`) on all state-changing POST forms. Mismatched or missing tokens are rejected.
+2. **Brute Force & Credential Stuffing Defense**: Sliding-window rate limiting on `LoginServlet` (5 failed attempts per client IP/email locks for 5 minutes), insulating the database and BCrypt hashing engine from CPU starvation attacks.
+3. **Session Fixation Mitigation**: `request.changeSessionId()` called immediately upon authentication, preventing session hijacking.
+4. **Access Control (BOLA / BFLA)**: Role-based boundary enforcement in `AuthFilter` and tenant ownership scoping in DAOs prevent buyers/sellers from accessing unauthorized resources.
+5. **SQL Injection Defense**: 100% parameterized queries via `PreparedStatement` across all DAOs; classic payloads return zero unauthorized records.
+6. **XSS Defense**: Context-sensitive HTML escaping via `HtmlUtil.escape` across all user input displayed on JSP pages.
 
 ---
 

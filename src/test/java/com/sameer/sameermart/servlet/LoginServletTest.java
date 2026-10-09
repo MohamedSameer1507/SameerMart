@@ -131,4 +131,60 @@ public class LoginServletTest {
         verify(session).setAttribute("role", "ADMIN");
         verify(response).sendRedirect("/SameerMart/admin/dashboard.jsp");
     }
+
+    @Test
+    public void testLoginRateLimitingAfterExcessiveFailures() throws Exception {
+        when(request.getParameter("email")).thenReturn("attacker@test.com");
+        when(request.getParameter("password")).thenReturn("wrongpassword");
+        when(request.getRemoteAddr()).thenReturn("192.168.1.50");
+        when(mockUserDAO.findByEmail("attacker@test.com")).thenReturn(null);
+
+        // 5 consecutive failed attempts
+        for (int i = 0; i < 5; i++) {
+            servlet.doPost(request, response);
+        }
+        verify(response, times(5)).sendRedirect("/SameerMart/login.jsp?error=Invalid+email+or+password");
+        verify(mockUserDAO, times(5)).findByEmail("attacker@test.com");
+
+        // 6th attempt should be blocked immediately by sliding-window rate limiter
+        reset(response);
+        servlet.doPost(request, response);
+
+        verify(response).sendRedirect(contains("Too+many+failed+login+attempts"));
+        // UserDAO must NOT be queried for the 6th attempt (CPU/DB exhaustion defense)
+        verify(mockUserDAO, times(5)).findByEmail("attacker@test.com");
+    }
+
+    @Test
+    public void testSuccessfulLoginResetsFailedAttemptCounter() throws Exception {
+        User user = new User(10, "Recovered User", "user@test.com", "$2a$12$hashed", "BUYER");
+        when(request.getRemoteAddr()).thenReturn("192.168.1.55");
+
+        // 3 failed attempts
+        when(request.getParameter("email")).thenReturn("user@test.com");
+        when(request.getParameter("password")).thenReturn("badpass");
+        when(mockUserDAO.findByEmail("user@test.com")).thenReturn(user);
+        when(mockUserDAO.verifyPassword("badpass", "$2a$12$hashed")).thenReturn(false);
+
+        for (int i = 0; i < 3; i++) {
+            servlet.doPost(request, response);
+        }
+        verify(response, times(3)).sendRedirect("/SameerMart/login.jsp?error=Invalid+email+or+password");
+
+        // 4th attempt: successful authentication resets the counter
+        when(request.getParameter("password")).thenReturn("goodpass");
+        when(mockUserDAO.verifyPassword("goodpass", "$2a$12$hashed")).thenReturn(true);
+        reset(response);
+        servlet.doPost(request, response);
+        verify(response).sendRedirect("/SameerMart/buyer/marketplace");
+
+        // 3 more failed attempts should not trigger lockout because counter was reset
+        when(request.getParameter("password")).thenReturn("badpass");
+        when(mockUserDAO.verifyPassword("badpass", "$2a$12$hashed")).thenReturn(false);
+        reset(response);
+        for (int i = 0; i < 3; i++) {
+            servlet.doPost(request, response);
+        }
+        verify(response, times(3)).sendRedirect("/SameerMart/login.jsp?error=Invalid+email+or+password");
+    }
 }
