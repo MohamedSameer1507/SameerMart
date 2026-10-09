@@ -4,9 +4,8 @@ import com.sameer.sameermart.dao.OrderDAO;
 import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.SellerOrderItem;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class OrderApiServletTest {
@@ -28,7 +28,7 @@ public class OrderApiServletTest {
     private HttpSession session;
     private StringWriter responseWriter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new OrderApiServlet();
         mockOrderDAO = mock(OrderDAO.class);
@@ -51,8 +51,8 @@ public class OrderApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":false"));
-        Assert.assertTrue(json.contains("UNAUTHORIZED"));
+        assertTrue(json.contains("\"success\":false"));
+        assertTrue(json.contains("UNAUTHORIZED"));
     }
 
     @Test
@@ -69,8 +69,8 @@ public class OrderApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("CONFIRMED"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("CONFIRMED"));
     }
 
     @Test
@@ -88,8 +88,8 @@ public class OrderApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("SHIPPED"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("SHIPPED"));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class OrderApiServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("DELIVERED"));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("DELIVERED"));
     }
 }

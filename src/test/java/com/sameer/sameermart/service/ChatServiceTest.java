@@ -1,13 +1,11 @@
 package com.sameer.sameermart.service;
 
 import com.sameer.sameermart.ai.ChatProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,21 +16,21 @@ public class ChatServiceTest {
     private ChatProvider mockProvider;
     private ChatService chatService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockProvider = Mockito.mock(ChatProvider.class);
         chatService = new ChatService(mockProvider, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyMessageThrowsException() {
-        chatService.processMessage("session1", "   ");
+        assertThrows(IllegalArgumentException.class, () -> chatService.processMessage("session1", "   "));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMessageOver500CharsThrowsException() {
         String longMessage = "a".repeat(501);
-        chatService.processMessage("session1", longMessage);
+        assertThrows(IllegalArgumentException.class, () -> chatService.processMessage("session1", longMessage));
     }
 
     @Test
@@ -57,7 +55,7 @@ public class ChatServiceTest {
         verify(mockProvider, times(1)).getReply(anyString(), anyString());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testRateLimitingEnforcedAt10PerMinute() {
         when(mockProvider.getReply(anyString(), anyString())).thenReturn("ok");
 
@@ -68,7 +66,7 @@ public class ChatServiceTest {
         }
 
         // 11th request must exceed rate limit and throw IllegalStateException
-        chatService.processMessage(sessionId, "Message number 11");
+        assertThrows(IllegalStateException.class, () -> chatService.processMessage(sessionId, "Message number 11"));
     }
 
     @Test

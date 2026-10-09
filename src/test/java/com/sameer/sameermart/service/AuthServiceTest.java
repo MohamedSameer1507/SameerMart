@@ -5,10 +5,10 @@ import com.sameer.sameermart.exception.ConflictException;
 import com.sameer.sameermart.exception.UnauthorizedException;
 import com.sameer.sameermart.exception.ValidationException;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class AuthServiceTest {
@@ -16,7 +16,7 @@ public class AuthServiceTest {
     private UserDAO mockUserDAO;
     private AuthService authService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockUserDAO = mock(UserDAO.class);
         authService = new AuthServiceImpl(mockUserDAO);
@@ -29,19 +29,19 @@ public class AuthServiceTest {
         when(mockUserDAO.findByEmail("test@test.com")).thenReturn(user);
 
         User authenticated = authService.authenticate("test@test.com", "secret123");
-        Assert.assertNotNull(authenticated);
-        Assert.assertEquals("test@test.com", authenticated.getEmail());
+        assertNotNull(authenticated);
+        assertEquals("test@test.com", authenticated.getEmail());
     }
 
-    @Test(expected = UnauthorizedException.class)
+    @Test
     public void testAuthenticateFailureThrowsUnauthorized() {
         when(mockUserDAO.findByEmail("test@test.com")).thenReturn(null);
-        authService.authenticate("test@test.com", "wrong");
+        assertThrows(UnauthorizedException.class, () -> authService.authenticate("test@test.com", "wrong"));
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void testAuthenticateEmptyCredentialsThrowsValidation() {
-        authService.authenticate("", "");
+        assertThrows(ValidationException.class, () -> authService.authenticate("", ""));
     }
 
     @Test
@@ -51,18 +51,18 @@ public class AuthServiceTest {
         when(mockUserDAO.findByEmail("new@test.com")).thenReturn(null).thenReturn(created);
 
         User registered = authService.register("New", "new@test.com", "password123", "BUYER");
-        Assert.assertNotNull(registered);
-        Assert.assertEquals("new@test.com", registered.getEmail());
+        assertNotNull(registered);
+        assertEquals("new@test.com", registered.getEmail());
     }
 
-    @Test(expected = ConflictException.class)
+    @Test
     public void testRegisterDuplicateEmailThrowsConflict() {
         when(mockUserDAO.findByEmail("exists@test.com")).thenReturn(new User());
-        authService.register("User", "exists@test.com", "password123", "BUYER");
+        assertThrows(ConflictException.class, () -> authService.register("User", "exists@test.com", "password123", "BUYER"));
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void testRegisterInvalidRoleThrowsValidation() {
-        authService.register("User", "new@test.com", "password123", "SUPERADMIN");
+        assertThrows(ValidationException.class, () -> authService.register("User", "new@test.com", "password123", "SUPERADMIN"));
     }
 }

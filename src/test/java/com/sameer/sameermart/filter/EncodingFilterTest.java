@@ -1,7 +1,7 @@
 package com.sameer.sameermart.filter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletRequest;
@@ -17,7 +17,7 @@ public class EncodingFilterTest {
     private ServletResponse response;
     private FilterChain chain;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         filter = new EncodingFilter();
         request = mock(ServletRequest.class);

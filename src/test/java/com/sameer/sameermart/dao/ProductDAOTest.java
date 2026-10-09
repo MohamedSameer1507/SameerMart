@@ -4,15 +4,16 @@ import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProductDAOTest {
 
@@ -23,7 +24,7 @@ public class ProductDAOTest {
     private static User seller;
     private static User buyer;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -99,28 +100,28 @@ public class ProductDAOTest {
     public void testAddAndFindProductById() {
         Product p = new Product(seller.getId(), "Fresh Mangoes", "Sweet Alphonso", "Fruits", new BigDecimal("250.00"), 30);
         boolean added = productDAO.addProduct(p);
-        Assert.assertTrue(added);
+        assertTrue(added);
 
         List<Product> sellerProducts = productDAO.findBySellerId(seller.getId());
-        Assert.assertFalse(sellerProducts.isEmpty());
+        assertFalse(sellerProducts.isEmpty());
         Product found = sellerProducts.get(0);
-        Assert.assertEquals("Fresh Mangoes", found.getName());
-        Assert.assertEquals("Sweet Alphonso", found.getDescription());
-        Assert.assertEquals("Fruits", found.getCategory());
-        Assert.assertEquals(new BigDecimal("250.00"), found.getPrice());
-        Assert.assertEquals(30, found.getQuantity());
+        assertEquals("Fresh Mangoes", found.getName());
+        assertEquals("Sweet Alphonso", found.getDescription());
+        assertEquals("Fruits", found.getCategory());
+        assertEquals(new BigDecimal("250.00"), found.getPrice());
+        assertEquals(30, found.getQuantity());
 
         Product byId = productDAO.findById(found.getId());
-        Assert.assertNotNull(byId);
-        Assert.assertEquals(found.getId(), byId.getId());
+        assertNotNull(byId);
+        assertEquals(found.getId(), byId.getId());
 
         Product byIdAndSeller = productDAO.findByIdAndSellerId(found.getId(), seller.getId());
-        Assert.assertNotNull(byIdAndSeller);
-        Assert.assertEquals(found.getId(), byIdAndSeller.getId());
+        assertNotNull(byIdAndSeller);
+        assertEquals(found.getId(), byIdAndSeller.getId());
 
         // Mismatched seller should return null
         Product mismatchedSeller = productDAO.findByIdAndSellerId(found.getId(), seller.getId() + 999);
-        Assert.assertNull(mismatchedSeller);
+        assertNull(mismatchedSeller);
     }
 
     @Test
@@ -135,7 +136,7 @@ public class ProductDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(created);
+        assertNotNull(created);
 
         created.setName("Updated Product Name");
         created.setDescription("Updated Desc");
@@ -145,15 +146,15 @@ public class ProductDAOTest {
         created.setImageUrl("updated.png");
 
         boolean updated = productDAO.updateProduct(created);
-        Assert.assertTrue("Product update should succeed", updated);
+        assertTrue(updated, "Product update should succeed");
 
         Product refreshed = productDAO.findById(created.getId());
-        Assert.assertEquals("Updated Product Name", refreshed.getName());
-        Assert.assertEquals("Updated Desc", refreshed.getDescription());
-        Assert.assertEquals("Dairy & Eggs", refreshed.getCategory());
-        Assert.assertEquals(new BigDecimal("55.00"), refreshed.getPrice());
-        Assert.assertEquals(25, refreshed.getQuantity());
-        Assert.assertEquals("updated.png", refreshed.getImageUrl());
+        assertEquals("Updated Product Name", refreshed.getName());
+        assertEquals("Updated Desc", refreshed.getDescription());
+        assertEquals("Dairy & Eggs", refreshed.getCategory());
+        assertEquals(new BigDecimal("55.00"), refreshed.getPrice());
+        assertEquals(25, refreshed.getQuantity());
+        assertEquals("updated.png", refreshed.getImageUrl());
     }
 
     @Test
@@ -168,13 +169,13 @@ public class ProductDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(created);
+        assertNotNull(created);
 
         boolean stockUpdated = productDAO.updateStock(created.getId(), 77);
-        Assert.assertTrue(stockUpdated);
+        assertTrue(stockUpdated);
 
         Product refreshed = productDAO.findById(created.getId());
-        Assert.assertEquals(77, refreshed.getQuantity());
+        assertEquals(77, refreshed.getQuantity());
     }
 
     @Test
@@ -194,15 +195,15 @@ public class ProductDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(createdInactive);
+        assertNotNull(createdInactive);
         productDAO.toggleProductActive(createdInactive.getId(), false);
 
         List<Product> available = productDAO.findAllAvailable();
         for (Product p : available) {
-            Assert.assertNotEquals("Zero Stock Item", p.getName());
-            Assert.assertNotEquals("Inactive Item", p.getName());
-            Assert.assertTrue(p.getQuantity() > 0);
-            Assert.assertTrue(p.isActive());
+            assertNotEquals("Zero Stock Item", p.getName());
+            assertNotEquals("Inactive Item", p.getName());
+            assertTrue(p.getQuantity() > 0);
+            assertTrue(p.isActive());
         }
     }
 
@@ -219,11 +220,11 @@ public class ProductDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(createdUnpurchased);
+        assertNotNull(createdUnpurchased);
 
         ProductDAO.DeletionResult delRes = productDAO.deleteProduct(createdUnpurchased.getId(), seller.getId());
-        Assert.assertEquals(ProductDAO.DeletionResult.DELETED, delRes);
-        Assert.assertNull(productDAO.findById(createdUnpurchased.getId()));
+        assertEquals(ProductDAO.DeletionResult.DELETED, delRes);
+        assertNull(productDAO.findById(createdUnpurchased.getId()));
 
         // 2. Safe deactivation when order exists
         Product purchased = new Product(seller.getId(), "ToDeactivate", "desc", "Household", new BigDecimal("15.00"), 10);
@@ -236,22 +237,22 @@ public class ProductDAOTest {
                 break;
             }
         }
-        Assert.assertNotNull(createdPurchased);
+        assertNotNull(createdPurchased);
 
         // Buyer purchases 1 unit
         cartDAO.addItem(buyer.getId(), createdPurchased.getId(), 1);
         Order order = orderDAO.createOrderFromCart(buyer.getId());
-        Assert.assertNotNull(order);
+        assertNotNull(order);
 
         ProductDAO.DeletionResult deactRes = productDAO.deleteProduct(createdPurchased.getId(), seller.getId());
-        Assert.assertEquals(ProductDAO.DeletionResult.DEACTIVATED, deactRes);
+        assertEquals(ProductDAO.DeletionResult.DEACTIVATED, deactRes);
 
         Product stillExists = productDAO.findById(createdPurchased.getId());
-        Assert.assertNotNull(stillExists);
-        Assert.assertFalse("Product should now be inactive", stillExists.isActive());
+        assertNotNull(stillExists);
+        assertFalse(stillExists.isActive(), "Product should now be inactive");
 
         // 3. Not found when wrong seller tries to delete
         ProductDAO.DeletionResult wrongSellerRes = productDAO.deleteProduct(createdPurchased.getId(), seller.getId() + 9999);
-        Assert.assertEquals(ProductDAO.DeletionResult.NOT_FOUND, wrongSellerRes);
+        assertEquals(ProductDAO.DeletionResult.NOT_FOUND, wrongSellerRes);
     }
 }

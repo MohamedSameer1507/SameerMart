@@ -5,8 +5,8 @@ import com.sameer.sameermart.dao.OrderDAO;
 import com.sameer.sameermart.model.CartItem;
 import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.User;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ public class OrderServletTest {
     private HttpSession session;
     private RequestDispatcher dispatcher;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new OrderServlet();
         mockOrderDAO = mock(OrderDAO.class);

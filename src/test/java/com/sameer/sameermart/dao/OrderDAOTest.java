@@ -6,15 +6,16 @@ import com.sameer.sameermart.model.OrderItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.SellerOrderItem;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderDAOTest {
 
@@ -23,7 +24,7 @@ public class OrderDAOTest {
     private static CartDAO cartDAO;
     private static OrderDAO orderDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -95,14 +96,8 @@ public class OrderDAOTest {
         userDAO.registerUser(new User("Empty Buyer", "empty_" + prefix + "@test.com", "pass", "BUYER"));
         User buyer = userDAO.findByEmail("empty_" + prefix + "@test.com");
 
-        try {
-            orderDAO.createOrderFromCart(buyer.getId());
-            Assert.fail("Empty cart checkout should throw IllegalStateException");
-        } catch (IllegalStateException e) {
-            Assert.assertTrue(e.getMessage().contains("cart is empty"));
-        } catch (Exception e) {
-            Assert.fail("Unexpected exception: " + e.getMessage());
-        }
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> orderDAO.createOrderFromCart(buyer.getId()));
+        assertTrue(e.getMessage().contains("cart is empty"));
     }
 
     @Test
@@ -120,32 +115,32 @@ public class OrderDAOTest {
         cartDAO.addItem(buyer.getId(), created.getId(), 4);
         Order order = orderDAO.createOrderFromCart(buyer.getId());
 
-        Assert.assertNotNull(order);
-        Assert.assertEquals(new BigDecimal("600.00"), order.getTotalAmount());
-        Assert.assertEquals(buyer.getId(), order.getBuyerId());
+        assertNotNull(order);
+        assertEquals(new BigDecimal("600.00"), order.getTotalAmount());
+        assertEquals(buyer.getId(), order.getBuyerId());
 
         // Stock deducted from 20 to 16
         Product refreshed = productDAO.findById(created.getId());
-        Assert.assertEquals(16, refreshed.getQuantity());
+        assertEquals(16, refreshed.getQuantity());
 
         // Cart emptied
-        Assert.assertTrue(cartDAO.getCartItems(buyer.getId()).isEmpty());
+        assertTrue(cartDAO.getCartItems(buyer.getId()).isEmpty());
 
         // Buyer order lookup
         List<Order> buyerOrders = orderDAO.findOrdersByBuyerId(buyer.getId());
-        Assert.assertEquals(1, buyerOrders.size());
-        Assert.assertEquals(order.getId(), buyerOrders.get(0).getId());
+        assertEquals(1, buyerOrders.size());
+        assertEquals(order.getId(), buyerOrders.get(0).getId());
 
         // Find by ID and buyer ID
         Order found = orderDAO.findOrderById(order.getId(), buyer.getId());
-        Assert.assertNotNull(found);
-        Assert.assertEquals(order.getId(), found.getId());
+        assertNotNull(found);
+        assertEquals(order.getId(), found.getId());
 
         // Order items
         List<OrderItem> items = orderDAO.findOrderItems(order.getId());
-        Assert.assertEquals(1, items.size());
-        Assert.assertEquals(4, items.get(0).getQuantity());
-        Assert.assertEquals(new BigDecimal("150.00"), items.get(0).getPrice());
+        assertEquals(1, items.size());
+        assertEquals(4, items.get(0).getQuantity());
+        assertEquals(new BigDecimal("150.00"), items.get(0).getPrice());
     }
 
     @Test
@@ -168,21 +163,21 @@ public class OrderDAOTest {
         cartDAO.addItem(buyer.getId(), prodA.getId(), 3); // 3 * 40 = 120.00
         cartDAO.addItem(buyer.getId(), prodB.getId(), 2); // 2 * 70 = 140.00
         Order order = orderDAO.createOrderFromCart(buyer.getId());
-        Assert.assertNotNull(order);
+        assertNotNull(order);
 
         // Seller A should see ONLY product A
         List<SellerOrderItem> sellerAOrders = orderDAO.findSellerOrders(sellerA.getId());
-        Assert.assertEquals(1, sellerAOrders.size());
-        Assert.assertEquals(prodA.getId(), sellerAOrders.get(0).getProductId());
-        Assert.assertEquals(new BigDecimal("120.00"), orderDAO.getSellerRevenue(sellerA.getId()));
-        Assert.assertEquals(1, orderDAO.getSellerTotalOrders(sellerA.getId()));
+        assertEquals(1, sellerAOrders.size());
+        assertEquals(prodA.getId(), sellerAOrders.get(0).getProductId());
+        assertEquals(new BigDecimal("120.00"), orderDAO.getSellerRevenue(sellerA.getId()));
+        assertEquals(1, orderDAO.getSellerTotalOrders(sellerA.getId()));
 
         // Seller B should see ONLY product B
         List<SellerOrderItem> sellerBOrders = orderDAO.findSellerOrders(sellerB.getId());
-        Assert.assertEquals(1, sellerBOrders.size());
-        Assert.assertEquals(prodB.getId(), sellerBOrders.get(0).getProductId());
-        Assert.assertEquals(new BigDecimal("140.00"), orderDAO.getSellerRevenue(sellerB.getId()));
-        Assert.assertEquals(1, orderDAO.getSellerTotalOrders(sellerB.getId()));
+        assertEquals(1, sellerBOrders.size());
+        assertEquals(prodB.getId(), sellerBOrders.get(0).getProductId());
+        assertEquals(new BigDecimal("140.00"), orderDAO.getSellerRevenue(sellerB.getId()));
+        assertEquals(1, orderDAO.getSellerTotalOrders(sellerB.getId()));
     }
 
     @Test
@@ -203,22 +198,22 @@ public class OrderDAOTest {
         Order order1 = orderDAO.createOrderFromCart(buyer1.getId());
 
         // Owner can access
-        Assert.assertNotNull(orderDAO.findOrderById(order1.getId(), buyer1.getId()));
+        assertNotNull(orderDAO.findOrderById(order1.getId(), buyer1.getId()));
 
         // Other buyer cannot access order1
-        Assert.assertNull("Non-owner buyer must be barred from accessing order",
-                orderDAO.findOrderById(order1.getId(), buyer2.getId()));
+        assertNull(orderDAO.findOrderById(order1.getId(), buyer2.getId()),
+                "Non-owner buyer must be barred from accessing order");
     }
 
     @Test
     public void testFindAllOrdersAndPlatformMetrics() throws Exception {
         List<Order> allOrders = orderDAO.findAllOrders();
-        Assert.assertNotNull(allOrders);
+        assertNotNull(allOrders);
 
         BigDecimal revenue = orderDAO.getPlatformTotalRevenue();
-        Assert.assertNotNull(revenue);
+        assertNotNull(revenue);
 
         int totalOrders = orderDAO.getPlatformTotalOrders();
-        Assert.assertTrue(totalOrders >= 0);
+        assertTrue(totalOrders >= 0);
     }
 }

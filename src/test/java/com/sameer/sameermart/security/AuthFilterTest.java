@@ -2,8 +2,8 @@ package com.sameer.sameermart.security;
 
 import com.sameer.sameermart.filter.AuthFilter;
 import com.sameer.sameermart.model.User;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ public class AuthFilterTest {
     private FilterChain chain;
     private HttpSession session;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         filter = new AuthFilter();
         request = mock(HttpServletRequest.class);

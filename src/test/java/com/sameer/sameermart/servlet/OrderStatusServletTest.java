@@ -3,9 +3,8 @@ package com.sameer.sameermart.servlet;
 import com.sameer.sameermart.dao.OrderDAO;
 import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +14,8 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class OrderStatusServletTest {
@@ -26,7 +27,7 @@ public class OrderStatusServletTest {
     private HttpSession session;
     private StringWriter responseWriter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new OrderStatusServlet();
         mockOrderDAO = mock(OrderDAO.class);
@@ -224,35 +225,35 @@ public class OrderStatusServletTest {
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(response).setContentType("application/json;charset=UTF-8");
         String json = responseWriter.toString();
-        Assert.assertTrue(json.contains("\"success\":true"));
-        Assert.assertTrue(json.contains("\"status\":\"SHIPPED\""));
+        assertTrue(json.contains("\"success\":true"));
+        assertTrue(json.contains("\"status\":\"SHIPPED\""));
     }
 
     @Test
     public void testIsValidStatusTransitionStateMatrix() {
         // PENDING transitions
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("PENDING", "CONFIRMED"));
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("PENDING", "CANCELLED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("PENDING", "SHIPPED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("PENDING", "DELIVERED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("PENDING", "CONFIRMED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("PENDING", "CANCELLED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("PENDING", "SHIPPED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("PENDING", "DELIVERED"));
 
         // CONFIRMED transitions
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "SHIPPED"));
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "CANCELLED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "DELIVERED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "PENDING"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "SHIPPED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "CANCELLED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "DELIVERED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "PENDING"));
 
         // SHIPPED transitions
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("SHIPPED", "DELIVERED"));
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("SHIPPED", "CANCELLED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("SHIPPED", "CONFIRMED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("SHIPPED", "DELIVERED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("SHIPPED", "CANCELLED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("SHIPPED", "CONFIRMED"));
 
         // Terminal states
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("DELIVERED", "CONFIRMED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("DELIVERED", "CANCELLED"));
-        Assert.assertFalse(OrderStatusServlet.isValidStatusTransition("CANCELLED", "PENDING"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("DELIVERED", "CONFIRMED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("DELIVERED", "CANCELLED"));
+        assertFalse(OrderStatusServlet.isValidStatusTransition("CANCELLED", "PENDING"));
 
         // Same status is valid idempotent
-        Assert.assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "CONFIRMED"));
+        assertTrue(OrderStatusServlet.isValidStatusTransition("CONFIRMED", "CONFIRMED"));
     }
 }

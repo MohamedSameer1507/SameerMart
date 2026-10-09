@@ -1,16 +1,16 @@
 package com.sameer.sameermart.ai;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MockChatProviderTest {
 
     private MockChatProvider provider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         provider = new MockChatProvider();
     }

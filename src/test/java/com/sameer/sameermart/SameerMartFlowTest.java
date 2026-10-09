@@ -10,11 +10,10 @@ import com.sameer.sameermart.model.OrderItem;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.SellerOrderItem;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -22,7 +21,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+import static org.junit.jupiter.api.Assertions.*;
+
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class SameerMartFlowTest {
 
     private static UserDAO userDAO;
@@ -30,7 +31,7 @@ public class SameerMartFlowTest {
     private static CartDAO cartDAO;
     private static OrderDAO orderDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -106,18 +107,18 @@ public class SameerMartFlowTest {
 
         User user = new User("Test Buyer", email, plainPassword, "BUYER");
         boolean registered = userDAO.registerUser(user);
-        Assert.assertTrue("User registration should succeed", registered);
+        assertTrue(registered, "User registration should succeed");
 
         User loaded = userDAO.findByEmail(email);
-        Assert.assertNotNull("Loaded user should not be null", loaded);
-        Assert.assertNotEquals("Password should be hashed with BCrypt, not plain text", plainPassword, loaded.getPassword());
-        Assert.assertTrue("Password hash should start with $2a$", loaded.getPassword().startsWith("$2a$") || loaded.getPassword().startsWith("$2b$"));
+        assertNotNull(loaded, "Loaded user should not be null");
+        assertNotEquals(plainPassword, loaded.getPassword(), "Password should be hashed with BCrypt, not plain text");
+        assertTrue(loaded.getPassword().startsWith("$2a$") || loaded.getPassword().startsWith("$2b$"), "Password hash should start with $2a$");
 
         boolean verified = userDAO.verifyPassword(plainPassword, loaded.getPassword());
-        Assert.assertTrue("Correct password should verify against BCrypt hash", verified);
+        assertTrue(verified, "Correct password should verify against BCrypt hash");
 
         boolean wrongVerified = userDAO.verifyPassword("WrongPassword", loaded.getPassword());
-        Assert.assertFalse("Incorrect password should fail verification", wrongVerified);
+        assertFalse(wrongVerified, "Incorrect password should fail verification");
     }
 
     @Test
@@ -143,32 +144,32 @@ public class SameerMartFlowTest {
                 "rice.jpg"
         );
         boolean added = productDAO.addProduct(product);
-        Assert.assertTrue("Product addition should succeed", added);
+        assertTrue(added, "Product addition should succeed");
 
         List<Product> sellerProducts = productDAO.findBySellerId(seller.getId());
-        Assert.assertFalse("Seller should have listed products", sellerProducts.isEmpty());
+        assertFalse(sellerProducts.isEmpty(), "Seller should have listed products");
         Product createdProduct = sellerProducts.get(0);
         int initialStock = createdProduct.getQuantity();
 
         // Buyer adds 5 units to cart
         boolean cartAdded = cartDAO.addItem(buyer.getId(), createdProduct.getId(), 5);
-        Assert.assertTrue("Add to cart should succeed", cartAdded);
+        assertTrue(cartAdded, "Add to cart should succeed");
 
         BigDecimal cartTotal = cartDAO.getCartTotal(buyer.getId());
-        Assert.assertEquals("Cart total should be 5 * 120.00 = 600.00", new BigDecimal("600.00"), cartTotal);
+        assertEquals(new BigDecimal("600.00"), cartTotal, "Cart total should be 5 * 120.00 = 600.00");
 
         // Buyer checks out
         Order order = orderDAO.createOrderFromCart(buyer.getId());
-        Assert.assertNotNull("Order should be created", order);
-        Assert.assertEquals("Order total should equal cart total", new BigDecimal("600.00"), order.getTotalAmount());
-        Assert.assertEquals("Order status should be CONFIRMED", "CONFIRMED", order.getStatus());
+        assertNotNull(order, "Order should be created");
+        assertEquals(new BigDecimal("600.00"), order.getTotalAmount(), "Order total should equal cart total");
+        assertEquals("CONFIRMED", order.getStatus(), "Order status should be CONFIRMED");
 
         // Stock should be deducted: 50 - 5 = 45
         Product updatedProduct = productDAO.findById(createdProduct.getId());
-        Assert.assertEquals("Stock should be deducted from 50 to 45", initialStock - 5, updatedProduct.getQuantity());
+        assertEquals(initialStock - 5, updatedProduct.getQuantity(), "Stock should be deducted from 50 to 45");
 
         // Cart should be empty after checkout
-        Assert.assertTrue("Cart should be cleared after checkout", cartDAO.getCartItems(buyer.getId()).isEmpty());
+        assertTrue(cartDAO.getCartItems(buyer.getId()).isEmpty(), "Cart should be cleared after checkout");
     }
 
     @Test
@@ -197,8 +198,8 @@ public class SameerMartFlowTest {
         Product loadedUnpurchased = productDAO.findBySellerId(seller.getId()).get(0);
 
         ProductDAO.DeletionResult delResult = productDAO.deleteProduct(loadedUnpurchased.getId(), seller.getId());
-        Assert.assertEquals("Unpurchased product should be physically DELETED", ProductDAO.DeletionResult.DELETED, delResult);
-        Assert.assertNull("Deleted product should not exist in database", productDAO.findById(loadedUnpurchased.getId()));
+        assertEquals(ProductDAO.DeletionResult.DELETED, delResult, "Unpurchased product should be physically DELETED");
+        assertNull(productDAO.findById(loadedUnpurchased.getId()), "Deleted product should not exist in database");
 
         // 2. Test Safe Deactivation for product WITH order history
         Product orderedProd = new Product(
@@ -218,32 +219,32 @@ public class SameerMartFlowTest {
         try {
             order = orderDAO.createOrderFromCart(buyer.getId());
         } catch (Exception e) {
-            Assert.fail("Order creation failed: " + e.getMessage());
+            fail("Order creation failed: " + e.getMessage());
         }
-        Assert.assertNotNull(order);
+        assertNotNull(order);
 
         // Delete requested for ordered product
         ProductDAO.DeletionResult deactResult = productDAO.deleteProduct(loadedOrderedProd.getId(), seller.getId());
-        Assert.assertEquals("Ordered product must be safely DEACTIVATED, not physically deleted", ProductDAO.DeletionResult.DEACTIVATED, deactResult);
+        assertEquals(ProductDAO.DeletionResult.DEACTIVATED, deactResult, "Ordered product must be safely DEACTIVATED, not physically deleted");
 
         // Must disappear from marketplace
         List<Product> marketplace = productDAO.findAllAvailable();
         for (Product p : marketplace) {
-            Assert.assertNotEquals("Deactivated product must not appear in active marketplace", loadedOrderedProd.getId(), p.getId());
+            assertNotEquals(loadedOrderedProd.getId(), p.getId(), "Deactivated product must not appear in active marketplace");
         }
 
         // Must NOT appear in seller active inventory
         List<Product> sellerCatalog = productDAO.findBySellerId(seller.getId());
         for (Product p : sellerCatalog) {
-            Assert.assertNotEquals("Deactivated product must not appear in seller active inventory", loadedOrderedProd.getId(), p.getId());
+            assertNotEquals(loadedOrderedProd.getId(), p.getId(), "Deactivated product must not appear in seller active inventory");
         }
 
         // Must still be preserved in buyer's historical order items!
         List<OrderItem> historicalItems = orderDAO.findOrderItems(order.getId());
-        Assert.assertFalse("Historical order items must remain intact", historicalItems.isEmpty());
-        Assert.assertEquals("Historical item should match product ID", loadedOrderedProd.getId(), historicalItems.get(0).getProductId());
-        Assert.assertNotNull("Historical product info should still be accessible", historicalItems.get(0).getProduct());
-        Assert.assertEquals("Purchased Cardamom", historicalItems.get(0).getProduct().getName());
+        assertFalse(historicalItems.isEmpty(), "Historical order items must remain intact");
+        assertEquals(loadedOrderedProd.getId(), historicalItems.get(0).getProductId(), "Historical item should match product ID");
+        assertNotNull(historicalItems.get(0).getProduct(), "Historical product info should still be accessible");
+        assertEquals("Purchased Cardamom", historicalItems.get(0).getProduct().getName());
     }
 
     @Test
@@ -276,25 +277,25 @@ public class SameerMartFlowTest {
         cartDAO.addItem(buyer.getId(), createdProdB.getId(), 3); // 3 * 60 = 180
 
         Order order = orderDAO.createOrderFromCart(buyer.getId());
-        Assert.assertNotNull(order);
+        assertNotNull(order);
 
         // Seller A views customer orders
         List<SellerOrderItem> sellerAOrders = orderDAO.findSellerOrders(sellerA.getId());
-        Assert.assertFalse("Seller A should have orders", sellerAOrders.isEmpty());
+        assertFalse(sellerAOrders.isEmpty(), "Seller A should have orders");
         for (SellerOrderItem item : sellerAOrders) {
-            Assert.assertEquals("Seller A should ONLY see Seller A's product", createdProdA.getId(), item.getProductId());
-            Assert.assertNotEquals("Seller A must NEVER see Seller B's product", createdProdB.getId(), item.getProductId());
+            assertEquals(createdProdA.getId(), item.getProductId(), "Seller A should ONLY see Seller A's product");
+            assertNotEquals(createdProdB.getId(), item.getProductId(), "Seller A must NEVER see Seller B's product");
         }
-        Assert.assertEquals("Seller A revenue should be exactly 300.00", new BigDecimal("300.00"), orderDAO.getSellerRevenue(sellerA.getId()));
+        assertEquals(new BigDecimal("300.00"), orderDAO.getSellerRevenue(sellerA.getId()), "Seller A revenue should be exactly 300.00");
 
         // Seller B views customer orders
         List<SellerOrderItem> sellerBOrders = orderDAO.findSellerOrders(sellerB.getId());
-        Assert.assertFalse("Seller B should have orders", sellerBOrders.isEmpty());
+        assertFalse(sellerBOrders.isEmpty(), "Seller B should have orders");
         for (SellerOrderItem item : sellerBOrders) {
-            Assert.assertEquals("Seller B should ONLY see Seller B's product", createdProdB.getId(), item.getProductId());
-            Assert.assertNotEquals("Seller B must NEVER see Seller A's product", createdProdA.getId(), item.getProductId());
+            assertEquals(createdProdB.getId(), item.getProductId(), "Seller B should ONLY see Seller B's product");
+            assertNotEquals(createdProdA.getId(), item.getProductId(), "Seller B must NEVER see Seller A's product");
         }
-        Assert.assertEquals("Seller B revenue should be exactly 180.00", new BigDecimal("180.00"), orderDAO.getSellerRevenue(sellerB.getId()));
+        assertEquals(new BigDecimal("180.00"), orderDAO.getSellerRevenue(sellerB.getId()), "Seller B revenue should be exactly 180.00");
     }
 
     @Test
@@ -319,15 +320,15 @@ public class SameerMartFlowTest {
         // Buyer 1 places order
         cartDAO.addItem(buyer1.getId(), createdProd.getId(), 1);
         Order order1 = orderDAO.createOrderFromCart(buyer1.getId());
-        Assert.assertNotNull(order1);
+        assertNotNull(order1);
 
         // Buyer 1 can find their own order
         Order foundByOwner = orderDAO.findOrderById(order1.getId(), buyer1.getId());
-        Assert.assertNotNull("Buyer 1 should access their own order", foundByOwner);
+        assertNotNull(foundByOwner, "Buyer 1 should access their own order");
 
         // Buyer 2 attempting to access Buyer 1's order MUST BE REJECTED
         Order foundByOther = orderDAO.findOrderById(order1.getId(), buyer2.getId());
-        Assert.assertNull("Buyer 2 MUST NOT be able to access Buyer 1's order", foundByOther);
+        assertNull(foundByOther, "Buyer 2 MUST NOT be able to access Buyer 1's order");
     }
 
     @Test
@@ -343,20 +344,20 @@ public class SameerMartFlowTest {
 
         // Admin toggles active to false
         boolean toggledOff = productDAO.toggleProductActive(createdProd.getId(), false);
-        Assert.assertTrue(toggledOff);
+        assertTrue(toggledOff);
         Product deactivated = productDAO.findById(createdProd.getId());
-        Assert.assertFalse("Product should now be inactive", deactivated.isActive());
+        assertFalse(deactivated.isActive(), "Product should now be inactive");
 
         // Admin toggles active to true
         boolean toggledOn = productDAO.toggleProductActive(createdProd.getId(), true);
-        Assert.assertTrue(toggledOn);
+        assertTrue(toggledOn);
         Product reactivated = productDAO.findById(createdProd.getId());
-        Assert.assertTrue("Product should now be active", reactivated.isActive());
+        assertTrue(reactivated.isActive(), "Product should now be active");
 
         // Platform metrics should be accessible
         BigDecimal platformRev = orderDAO.getPlatformTotalRevenue();
-        Assert.assertNotNull("Platform revenue should be queryable", platformRev);
+        assertNotNull(platformRev, "Platform revenue should be queryable");
         int platformOrders = orderDAO.getPlatformTotalOrders();
-        Assert.assertTrue("Platform orders count should be non-negative", platformOrders >= 0);
+        assertTrue(platformOrders >= 0, "Platform orders count should be non-negative");
     }
 }

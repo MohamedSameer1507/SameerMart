@@ -5,19 +5,20 @@ import com.sameer.sameermart.dao.ProductDAO;
 import com.sameer.sameermart.dao.UserDAO;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.HtmlUtil;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.Statement;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SecurityTest {
 
     private static UserDAO userDAO;
     private static ProductDAO productDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -48,7 +49,7 @@ public class SecurityTest {
 
         for (String payload : payloads) {
             User user = userDAO.findByEmail(payload);
-            Assert.assertNull("SQL injection payload '" + payload + "' must return null via PreparedStatement", user);
+            assertNull(user, "SQL injection payload '" + payload + "' must return null via PreparedStatement");
         }
     }
 
@@ -57,22 +58,22 @@ public class SecurityTest {
         // Test script injection
         String scriptPayload = "<script>alert('XSS')</script>";
         String escapedScript = HtmlUtil.escape(scriptPayload);
-        Assert.assertFalse("Escaped string must not contain raw '<script>'", escapedScript.contains("<script>"));
-        Assert.assertEquals("&lt;script&gt;alert(&#x27;XSS&#x27;)&lt;/script&gt;", escapedScript);
+        assertFalse(escapedScript.contains("<script>"), "Escaped string must not contain raw '<script>'");
+        assertEquals("&lt;script&gt;alert(&#x27;XSS&#x27;)&lt;/script&gt;", escapedScript);
 
         // Test img onerror injection
         String imgPayload = "<img src=x onerror=alert(1)>";
         String escapedImg = HtmlUtil.escape(imgPayload);
-        Assert.assertFalse("Escaped string must not contain raw '<img'", escapedImg.contains("<img"));
-        Assert.assertEquals("&lt;img src=x onerror=alert(1)&gt;", escapedImg);
+        assertFalse(escapedImg.contains("<img"), "Escaped string must not contain raw '<img'");
+        assertEquals("&lt;img src=x onerror=alert(1)&gt;", escapedImg);
 
         // Test quote and ampersand injection
         String quotePayload = "\" onmouseover=\"alert('xss')\" & '";
         String escapedQuotes = HtmlUtil.escape(quotePayload);
-        Assert.assertEquals("&quot; onmouseover=&quot;alert(&#x27;xss&#x27;)&quot; &amp; &#x27;", escapedQuotes);
+        assertEquals("&quot; onmouseover=&quot;alert(&#x27;xss&#x27;)&quot; &amp; &#x27;", escapedQuotes);
 
         // Test null handling
-        Assert.assertEquals("", HtmlUtil.escape(null));
+        assertEquals("", HtmlUtil.escape(null));
     }
 
     @Test
@@ -82,16 +83,16 @@ public class SecurityTest {
         userDAO.registerUser(user);
 
         User saved = userDAO.findByEmail("strength@test.com");
-        Assert.assertNotNull(saved);
+        assertNotNull(saved);
 
         // BCrypt format: $2a$12$... or $2b$12$... (cost factor 12)
-        Assert.assertTrue("BCrypt hash must start with $2a$ or $2b$",
-                saved.getPassword().startsWith("$2a$") || saved.getPassword().startsWith("$2b$"));
-        Assert.assertTrue("BCrypt hash must be 60 characters in length", saved.getPassword().length() == 60);
+        assertTrue(saved.getPassword().startsWith("$2a$") || saved.getPassword().startsWith("$2b$"),
+                "BCrypt hash must start with $2a$ or $2b$");
+        assertTrue(saved.getPassword().length() == 60, "BCrypt hash must be 60 characters in length");
 
         // Password should verify
-        Assert.assertTrue(userDAO.verifyPassword(password, saved.getPassword()));
+        assertTrue(userDAO.verifyPassword(password, saved.getPassword()));
         // Plain text should never equal hash
-        Assert.assertNotEquals(password, saved.getPassword());
+        assertNotEquals(password, saved.getPassword());
     }
 }

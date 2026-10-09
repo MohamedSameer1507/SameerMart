@@ -2,9 +2,8 @@ package com.sameer.sameermart.servlet;
 
 import com.sameer.sameermart.dao.UserDAO;
 import com.sameer.sameermart.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ public class LoginServletTest {
     private HttpServletResponse response;
     private HttpSession session;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         servlet = new LoginServlet();
         mockUserDAO = mock(UserDAO.class);

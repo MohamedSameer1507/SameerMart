@@ -6,15 +6,16 @@ import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.Review;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.HtmlUtil;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReviewDAOTest {
 
@@ -24,7 +25,7 @@ public class ReviewDAOTest {
     private static OrderDAO orderDAO;
     private static ReviewDAO reviewDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         userDAO = new UserDAO();
         productDAO = new ProductDAO();
@@ -123,7 +124,7 @@ public class ReviewDAOTest {
         String email = prefix + "_" + UUID.randomUUID().toString().substring(0, 8) + "@test.com";
         userDAO.registerUser(new User(name, email, "pass", role));
         User created = userDAO.findByEmail(email);
-        Assert.assertNotNull(created);
+        assertNotNull(created);
         return created;
     }
 
@@ -171,12 +172,9 @@ public class ReviewDAOTest {
         Order order = orderDAO.createOrderFromCart(buyer.getId());
         // Status is CONFIRMED, not DELIVERED
 
-        try {
-            reviewDAO.addReview(buyer.getId(), product.getId(), 5, "Too early");
-            Assert.fail("Review should fail if order is not delivered");
-        } catch (IllegalStateException e) {
-            Assert.assertTrue(e.getMessage().contains("DELIVERED"));
-        }
+        IllegalStateException e = assertThrows(IllegalStateException.class, () ->
+                reviewDAO.addReview(buyer.getId(), product.getId(), 5, "Too early"));
+        assertTrue(e.getMessage().contains("DELIVERED"));
     }
 
     @Test
@@ -190,41 +188,35 @@ public class ReviewDAOTest {
                 "Excellent quality, highly recommended!"
         );
 
-        Assert.assertNotNull(created);
-        Assert.assertTrue(created.getId() > 0);
-        Assert.assertEquals(5, created.getRating());
-        Assert.assertEquals("Excellent quality, highly recommended!", created.getReviewText());
-        Assert.assertEquals(fixture.product.getId(), created.getProductId());
+        assertNotNull(created);
+        assertTrue(created.getId() > 0);
+        assertEquals(5, created.getRating());
+        assertEquals("Excellent quality, highly recommended!", created.getReviewText());
+        assertEquals(fixture.product.getId(), created.getProductId());
 
-        Assert.assertTrue(reviewDAO.hasReviewByBuyer(fixture.buyer.getId(), fixture.product.getId()));
-        Assert.assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
-        Assert.assertEquals(5.0, reviewDAO.getAverageRating(fixture.product.getId()), 0.0001);
+        assertTrue(reviewDAO.hasReviewByBuyer(fixture.buyer.getId(), fixture.product.getId()));
+        assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
+        assertEquals(5.0, reviewDAO.getAverageRating(fixture.product.getId()), 0.0001);
 
         List<Review> reviews = reviewDAO.findByProductId(fixture.product.getId());
-        Assert.assertEquals(1, reviews.size());
-        Assert.assertEquals(fixture.buyer.getName(), reviews.get(0).getBuyerName());
-        Assert.assertEquals(5, reviews.get(0).getRating());
+        assertEquals(1, reviews.size());
+        assertEquals(fixture.buyer.getName(), reviews.get(0).getBuyerName());
+        assertEquals(5, reviews.get(0).getRating());
     }
 
     @Test
     public void testInvalidRatingRejected() throws Exception {
         PurchasedFixture fixture = purchaseSingleProduct();
 
-        try {
-            reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 0, "bad");
-            Assert.fail("Rating 0 should be rejected");
-        } catch (IllegalArgumentException e) {
-            Assert.assertEquals("Rating must be between 1 and 5.", e.getMessage());
-        }
+        IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () ->
+                reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 0, "bad"));
+        assertEquals("Rating must be between 1 and 5.", e1.getMessage());
 
-        try {
-            reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 6, "bad");
-            Assert.fail("Rating 6 should be rejected");
-        } catch (IllegalArgumentException e) {
-            Assert.assertEquals("Rating must be between 1 and 5.", e.getMessage());
-        }
+        IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () ->
+                reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 6, "bad"));
+        assertEquals("Rating must be between 1 and 5.", e2.getMessage());
 
-        Assert.assertEquals(0, reviewDAO.getReviewCount(fixture.product.getId()));
+        assertEquals(0, reviewDAO.getReviewCount(fixture.product.getId()));
     }
 
     @Test
@@ -242,16 +234,13 @@ public class ReviewDAOTest {
         ));
         Product product = productDAO.findBySellerId(seller.getId()).get(0);
 
-        Assert.assertFalse(reviewDAO.hasPurchasedProduct(nonBuyer.getId(), product.getId()));
+        assertFalse(reviewDAO.hasPurchasedProduct(nonBuyer.getId(), product.getId()));
 
-        try {
-            reviewDAO.addReview(nonBuyer.getId(), product.getId(), 4, "fake");
-            Assert.fail("Review without purchase should be rejected");
-        } catch (IllegalStateException e) {
-            Assert.assertEquals("You must purchase this product before reviewing it.", e.getMessage());
-        }
+        IllegalStateException e = assertThrows(IllegalStateException.class, () ->
+                reviewDAO.addReview(nonBuyer.getId(), product.getId(), 4, "fake"));
+        assertEquals("You must purchase this product before reviewing it.", e.getMessage());
 
-        Assert.assertEquals(0, reviewDAO.getReviewCount(product.getId()));
+        assertEquals(0, reviewDAO.getReviewCount(product.getId()));
     }
 
     @Test
@@ -260,18 +249,15 @@ public class ReviewDAOTest {
 
         reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 4, "First review");
 
-        try {
-            reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 1, "Second attempt");
-            Assert.fail("Duplicate review should be rejected");
-        } catch (IllegalStateException e) {
-            Assert.assertEquals("You have already reviewed this product.", e.getMessage());
-        }
+        IllegalStateException e = assertThrows(IllegalStateException.class, () ->
+                reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 1, "Second attempt"));
+        assertEquals("You have already reviewed this product.", e.getMessage());
 
-        Assert.assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
+        assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
         List<Review> reviews = reviewDAO.findByProductId(fixture.product.getId());
-        Assert.assertEquals(1, reviews.size());
-        Assert.assertEquals(4, reviews.get(0).getRating());
-        Assert.assertEquals("First review", reviews.get(0).getReviewText());
+        assertEquals(1, reviews.size());
+        assertEquals(4, reviews.get(0).getRating());
+        assertEquals("First review", reviews.get(0).getReviewText());
     }
 
     @Test
@@ -283,13 +269,13 @@ public class ReviewDAOTest {
         reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 3, xssPayload);
 
         List<Review> reviews = reviewDAO.findByProductId(fixture.product.getId());
-        Assert.assertEquals(1, reviews.size());
-        Assert.assertEquals(xssPayload, reviews.get(0).getReviewText());
+        assertEquals(1, reviews.size());
+        assertEquals(xssPayload, reviews.get(0).getReviewText());
 
         String escaped = HtmlUtil.escape(reviews.get(0).getReviewText());
-        Assert.assertFalse(escaped.contains("<script>"));
-        Assert.assertFalse(escaped.contains("<img"));
-        Assert.assertTrue(escaped.contains("&lt;script&gt;"));
+        assertFalse(escaped.contains("<script>"));
+        assertFalse(escaped.contains("<img"));
+        assertTrue(escaped.contains("&lt;script&gt;"));
     }
 
     @Test
@@ -301,16 +287,16 @@ public class ReviewDAOTest {
         reviewDAO.addReview(fixture.buyer.getId(), fixture.product.getId(), 4, sqlPayload);
 
         List<Review> reviews = reviewDAO.findByProductId(fixture.product.getId());
-        Assert.assertEquals(1, reviews.size());
-        Assert.assertEquals(sqlPayload, reviews.get(0).getReviewText());
+        assertEquals(1, reviews.size());
+        assertEquals(sqlPayload, reviews.get(0).getReviewText());
 
-        Assert.assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
-        Assert.assertEquals(4.0, reviewDAO.getAverageRating(fixture.product.getId()), 0.0001);
-        Assert.assertNotNull(reviewDAO.findByProductId(fixture.product.getId()));
+        assertEquals(1, reviewDAO.getReviewCount(fixture.product.getId()));
+        assertEquals(4.0, reviewDAO.getAverageRating(fixture.product.getId()), 0.0001);
+        assertNotNull(reviewDAO.findByProductId(fixture.product.getId()));
 
         Product product = productDAO.findById(fixture.product.getId());
-        Assert.assertNotNull(product);
-        Assert.assertEquals(48, product.getQuantity());
+        assertNotNull(product);
+        assertEquals(48, product.getQuantity());
     }
 
     @Test
@@ -340,14 +326,14 @@ public class ReviewDAOTest {
         reviewDAO.addReview(buyer1.getId(), product.getId(), 4, "Very good");
         reviewDAO.addReview(buyer2.getId(), product.getId(), 2, "Could be better");
 
-        Assert.assertEquals(2, reviewDAO.getReviewCount(product.getId()));
-        Assert.assertEquals(3.0, reviewDAO.getAverageRating(product.getId()), 0.0001);
+        assertEquals(2, reviewDAO.getReviewCount(product.getId()));
+        assertEquals(3.0, reviewDAO.getAverageRating(product.getId()), 0.0001);
 
         List<Review> reviews = reviewDAO.findByProductId(product.getId());
-        Assert.assertEquals(2, reviews.size());
+        assertEquals(2, reviews.size());
 
         Review newest = reviews.get(0);
-        Assert.assertEquals(buyer2.getId(), newest.getBuyerId());
-        Assert.assertEquals(2, newest.getRating());
+        assertEquals(buyer2.getId(), newest.getBuyerId());
+        assertEquals(2, newest.getRating());
     }
 }
