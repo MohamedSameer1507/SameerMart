@@ -10,8 +10,12 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatabaseContextListener implements ServletContextListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseContextListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -161,54 +165,38 @@ public class DatabaseContextListener implements ServletContextListener {
             if (!uploadDir.exists()
                     && !uploadDir.mkdirs()) {
 
-                System.err.println(
-                        "WARNING: Could not create product image upload directory: "
-                                + uploadDir.getAbsolutePath()
-                );
+                logger.warn("Could not create product image upload directory: {}", uploadDir.getAbsolutePath());
             }
 
             // Seed default admin account if not exists
+            String adminName = System.getenv("ADMIN_NAME") != null ? System.getenv("ADMIN_NAME") : "System Administrator";
+            String adminEmail = System.getenv("ADMIN_EMAIL") != null ? System.getenv("ADMIN_EMAIL") : "admin@sameermart.com";
+            String adminPassword = System.getenv("ADMIN_PASSWORD") != null ? System.getenv("ADMIN_PASSWORD") : "admin123";
+
             UserDAO userDAO = new UserDAO();
-            if (userDAO.findByEmail("admin@sameermart.com") == null) {
+            if (userDAO.findByEmail(adminEmail) == null) {
                 userDAO.registerUser(new User(
-                        "System Administrator",
-                        "admin@sameermart.com",
-                        "admin123",
+                        adminName,
+                        adminEmail,
+                        adminPassword,
                         "ADMIN"
                 ));
-                System.out.println("Default admin user created: admin@sameermart.com");
+                logger.info("Default admin user created: {}", adminEmail);
             }
 
-            System.out.println("=================================");
-            System.out.println("H2 DATABASE INITIALIZED");
-            System.out.println("Users table ready");
-            System.out.println("Products table ready");
-            System.out.println("Cart & Cart Items tables ready");
-            System.out.println("Orders & Order Items tables ready");
-            System.out.println("Reviews table ready");
-            System.out.println("=================================");
+            logger.info("H2 DATABASE INITIALIZED - Users, Products, Cart, Orders, Reviews tables ready");
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Database initialization failed",
-                    e
-            );
+            logger.error("Database initialization failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Database initialization failed", e);
         }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-
         if (DatabaseConfig.getDataSource() != null) {
-
-            DatabaseConfig
-                    .getDataSource()
-                    .close();
-
-            System.out.println(
-                    "HikariCP connection pool closed."
-            );
+            DatabaseConfig.getDataSource().close();
+            logger.info("HikariCP connection pool closed.");
         }
     }
 }

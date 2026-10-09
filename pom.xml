@@ -56,6 +56,15 @@
             <version>2.3.232</version>
         </dependency>
 
+        <!-- ========================================= -->
+        <!-- PostgreSQL Database (Production / Render) -->
+        <!-- ========================================= -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
+        </dependency>
+
 
         <!-- ========================================= -->
         <!-- BCrypt Password Hashing                   -->
