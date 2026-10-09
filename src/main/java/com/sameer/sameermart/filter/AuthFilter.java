@@ -20,7 +20,8 @@ import java.io.IOException;
         "/CartServlet",
         "/OrderServlet",
         "/ProductDetailsServlet",
-        "/AddToCartServlet"
+        "/AddToCartServlet",
+        "/WishlistServlet"
 })
 public class AuthFilter implements Filter {
 
