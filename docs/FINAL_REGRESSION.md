@@ -7,8 +7,8 @@
 **Build Tool:** Apache Maven 3.9.9  
 **Runtime Environment:** Java 17 (OpenJDK 64-Bit Server VM 17.0.12)  
 **Database for Tests:** In-memory H2 Database (`jdbc:h2:mem:sameermart_test;DB_CLOSE_DELAY=-1`)  
-**Final Status:** **BUILD SUCCESS — 153 Tests Passed (0 Failures, 0 Errors, 0 Skipped)**  
-**Total Execution Time:** 01:11 min (Surefire test run: ~52.8 s)  
+**Final Status:** **BUILD SUCCESS — 195 Tests Passed (0 Failures, 0 Errors, 0 Skipped)**  
+**Total Execution Time:** 01:11 min (Surefire test run: ~35.3 s)  
 **WAR Artifact:** `target/SameerMart.war`  
 
 ---
@@ -17,32 +17,40 @@
 
 | Test Suite / Class Name | Scope | Tests Run | Failures | Errors | Skipped | Elapsed Time |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **`UserDAOTest`** | F1: Registration, BCrypt password verify, unique constraints | 6 | 0 | 0 | 0 | 6.941 s |
+| **`UserDAOTest`** | F1: Registration, BCrypt password verify, unique constraints | 6 | 0 | 0 | 0 | 6.897 s |
 | **`ProductDAOTest`** | F2/F3: Catalog search, category filters, seller isolation, CRUD | 14 | 0 | 0 | 0 | 3.250 s |
 | **`CartDAOTest`** | F4: Persistent cart, stock limits, quantity update, clear | 12 | 0 | 0 | 0 | 3.820 s |
 | **`OrderDAOTest`** | F5/F6/O2: Atomic transactions, rollback, seller isolation, status | 14 | 0 | 0 | 0 | 4.650 s |
 | **`ReviewDAOTest`** | F8: Verified DELIVERED buyer constraint, ratings, duplicates | 11 | 0 | 0 | 0 | 5.210 s |
-| **`SameerMartFlowTest`** | End-to-End full user journey simulation (Register &rarr; Review) | 6 | 0 | 0 | 0 | 12.120 s |
-| **`BusinessRuleTest`** | Core domain constraints, stock validation, price calculations | 5 | 0 | 0 | 0 | 0.001 s |
-| **`AuthFilterTest`** | RBAC, anonymous redirects, role-based boundary enforcement | 7 | 0 | 0 | 0 | 0.162 s |
-| **`SecurityTest`** | CSRF validation, constant-time compare, XSS defense | 3 | 0 | 0 | 0 | 1.676 s |
-| **`RequestIdFilterTest`** | Observability: UUID injection into SLF4J MDC & header | 2 | 0 | 0 | 0 | 0.539 s |
-| **`EncodingFilterTest`** | Observability: UTF-8 character encoding enforcement | 1 | 0 | 0 | 0 | 2.411 s |
-| **`HealthServletTest`** | Observability: `/api/v1/health` JSON response, DB ping, down state | 2 | 0 | 0 | 0 | 1.244 s |
+| **`SameerMartFlowTest`** | End-to-End full user journey simulation (Register &rarr; Review) | 6 | 0 | 0 | 0 | 12.240 s |
+| **`BusinessRuleTest`** | Core domain constraints, stock validation, price calculations | 5 | 0 | 0 | 0 | 0.011 s |
+| **`AuthFilterTest`** | RBAC, anonymous redirects, role-based boundary enforcement | 7 | 0 | 0 | 0 | 0.160 s |
+| **`SecurityTest`** | CSRF validation, constant-time compare, XSS defense | 3 | 0 | 0 | 0 | 1.702 s |
+| **`RequestIdFilterTest`** | Observability: UUID injection into SLF4J MDC & header | 2 | 0 | 0 | 0 | 0.553 s |
+| **`EncodingFilterTest`** | Observability: UTF-8 character encoding enforcement | 1 | 0 | 0 | 0 | 2.303 s |
+| **`HealthServletTest`** | Observability: `/api/v1/health` JSON response, DB ping, down state | 2 | 0 | 0 | 0 | 0.943 s |
 | **`MockChatProviderTest`** | AI: Rule-based intent matching & fallback answers | 5 | 0 | 0 | 0 | 0.020 s |
-| **`ChatServiceTest`** | AI: Rate limiting (10/min), input sanitization (500 chars), cache | 6 | 0 | 0 | 0 | 0.048 s |
-| **`ChatServletTest`** | AI: `POST /api/v1/chat` CSRF validation, standard JSON envelope | 5 | 0 | 0 | 0 | 0.186 s |
-| **`LoginServletTest`** | F1: Login authentication controller, session fixation defense | 7 | 0 | 0 | 0 | 0.074 s |
-| **`RegisterServletTest`** | F1: Registration validation, role escalation prevention | 7 | 0 | 0 | 0 | 0.035 s |
-| **`ProductDetailsServletTest`** | F2: Single product view, stock display, review presentation | 7 | 0 | 0 | 0 | 0.078 s |
-| **`EditProductServletTest`** | F3: Seller edit authorization, image replacement, stock update | 7 | 0 | 0 | 0 | 0.086 s |
-| **`DeleteProductServletTest`** | F3: Seller deletion authorization, soft/hard removal | 5 | 0 | 0 | 0 | 0.051 s |
-| **`CartServletTest`** | F4: Cart addition, quantity mutation, CSRF validation | 7 | 0 | 0 | 0 | 0.177 s |
-| **`OrderServletTest`** | F5: Checkout controller, atomic transaction triggers | 9 | 0 | 0 | 0 | 0.123 s |
-| **`OrderStatusServletTest`** | O2: State machine (`PENDING`&rarr;`CONFIRMED`&rarr;`SHIPPED`&rarr;`DELIVERED`), 409 Conflict | 12 | 0 | 0 | 0 | 0.066 s |
-| **`AdminProductStatusServletTest`** | F7: Admin moderation toggle, authorization barrier | 4 | 0 | 0 | 0 | 0.196 s |
-| **`ReviewServletTest`** | F8: Review submission controller, rating bounds, XSS sanitization | 12 | 0 | 0 | 0 | 0.045 s |
-| **TOTAL** | **25 Test Classes** | **153** | **0** | **0** | **0** | **~52.8 s** |
+| **`ChatServiceTest`** | AI: Rate limiting (10/min), input sanitization (500 chars), cache | 6 | 0 | 0 | 0 | 0.039 s |
+| **`ChatServletTest`** | AI: `POST /api/v1/chat` CSRF validation, standard JSON envelope | 5 | 0 | 0 | 0 | 0.164 s |
+| **`AuthServiceTest`** | Layering: Auth business service, validation, conflict check | 6 | 0 | 0 | 0 | 1.747 s |
+| **`ProductServiceTest`** | Layering: Product business service, active/category query, CRUD | 6 | 0 | 0 | 0 | 0.005 s |
+| **`CartServiceTest`** | Layering: Cart business service, stock sufficiency, removal | 6 | 0 | 0 | 0 | 0.146 s |
+| **`OrderServiceTest`** | Layering: Order business service, atomic checkout, workflow | 6 | 0 | 0 | 0 | 0.174 s |
+| **`ReviewServiceTest`** | Layering: Review business service, rating bounds, duplicate block | 5 | 0 | 0 | 0 | 0.059 s |
+| **`ProductApiServletTest`** | REST API: `GET /api/v1/products` query, category filter, 404 | 6 | 0 | 0 | 0 | 0.045 s |
+| **`CartApiServletTest`** | REST API: `GET /api/v1/cart` totals calculation, 401/403 guards | 3 | 0 | 0 | 0 | 0.194 s |
+| **`OrderApiServletTest`** | REST API: `GET /api/v1/orders` role-based buyer/seller/admin views | 4 | 0 | 0 | 0 | 0.031 s |
+| **`LoginServletTest`** | F1: Login authentication controller, session fixation defense | 7 | 0 | 0 | 0 | 0.014 s |
+| **`RegisterServletTest`** | F1: Registration validation, role escalation prevention | 7 | 0 | 0 | 0 | 0.025 s |
+| **`ProductDetailsServletTest`** | F2: Single product view, stock display, review presentation | 7 | 0 | 0 | 0 | 0.035 s |
+| **`EditProductServletTest`** | F3: Seller edit authorization, image replacement, stock update | 7 | 0 | 0 | 0 | 0.097 s |
+| **`DeleteProductServletTest`** | F3: Seller deletion authorization, soft/hard removal | 5 | 0 | 0 | 0 | 0.080 s |
+| **`CartServletTest`** | F4: Cart addition, quantity mutation, CSRF validation | 7 | 0 | 0 | 0 | 0.130 s |
+| **`OrderServletTest`** | F5: Checkout controller, atomic transaction triggers | 9 | 0 | 0 | 0 | 0.041 s |
+| **`OrderStatusServletTest`** | O2: State machine (`PENDING`&rarr;`CONFIRMED`&rarr;`SHIPPED`&rarr;`DELIVERED`), 409 Conflict | 12 | 0 | 0 | 0 | 0.056 s |
+| **`AdminProductStatusServletTest`** | F7: Admin moderation toggle, authorization barrier | 4 | 0 | 0 | 0 | 0.033 s |
+| **`ReviewServletTest`** | F8: Review submission controller, rating bounds, XSS sanitization | 12 | 0 | 0 | 0 | 0.096 s |
+| **TOTAL** | **33 Test Classes** | **195** | **0** | **0** | **0** | **~35.3 s** |
 
 ---
 

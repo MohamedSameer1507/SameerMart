@@ -1,6 +1,6 @@
 # SameerMart — Multi-Vendor E-Commerce Platform
 
-[![Build & Test Status](https://img.shields.io/badge/Tests-153%20Passing-brightgreen.svg)](#automated-testing)
+[![Build & Test Status](https://img.shields.io/badge/Tests-195%20Passing-brightgreen.svg)](#automated-testing)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-orange.svg)](https://openjdk.org/)
 [![Servlet Spec](https://img.shields.io/badge/Servlet-4.0%20(Tomcat%209)-blue.svg)](https://tomcat.apache.org/)
 [![Database](https://img.shields.io/badge/Database-H2%20%7C%20PostgreSQL-indigo.svg)](https://www.postgresql.org/)
@@ -16,6 +16,9 @@
 - **Live Production URL**: [https://sameermart.onrender.com](https://sameermart.onrender.com) *(Render / Cloud Deployment)*
 - **Health Check Probe**: `GET /api/v1/health` &rarr; `{"success": true, "data": {"status": "UP", ...}}`
 - **Chatbot API**: `POST /api/v1/chat`
+- **Products REST API**: `GET /api/v1/products` *(supports `?category=`, `?search=`, `?id=`)*
+- **Cart REST API**: `GET /api/v1/cart` *(authenticated buyer)*
+- **Orders REST API**: `GET /api/v1/orders` *(role-aware buyer/seller/admin)*
 
 ---
 
