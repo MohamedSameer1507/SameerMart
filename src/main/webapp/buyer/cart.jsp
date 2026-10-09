@@ -57,6 +57,7 @@
         <nav>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/buyer/marketplace" class="nav-link">Marketplace</a></li>
+                <li><a href="${pageContext.request.contextPath}/buyer/wishlist" class="nav-link">Wishlist</a></li>
                 <li><a href="${pageContext.request.contextPath}/buyer/cart" class="nav-link active">My Cart (<%= itemCount %>)</a></li>
                 <li><a href="${pageContext.request.contextPath}/buyer/orders" class="nav-link">My Orders</a></li>
                 <li><a href="${pageContext.request.contextPath}/logout" class="nav-link">Logout</a></li>

@@ -112,6 +112,7 @@
         <nav>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/buyer/marketplace" class="nav-link active">Marketplace</a></li>
+                <li><a href="${pageContext.request.contextPath}/buyer/wishlist" class="nav-link">Wishlist</a></li>
                 <li><a href="${pageContext.request.contextPath}/buyer/cart" class="nav-link">My Cart (<%= cartCount %>)</a></li>
                 <li><a href="${pageContext.request.contextPath}/buyer/orders" class="nav-link">My Orders</a></li>
                 <li><a href="${pageContext.request.contextPath}/logout" class="nav-link">Logout</a></li>
@@ -204,10 +205,24 @@
                         </div>
                     <% } %>
 
+                    <div style="margin-bottom: 1.5rem;">
+                        <form action="${pageContext.request.contextPath}/buyer/wishlist" method="post" style="display: inline;">
+                            <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                            <input type="hidden" name="action" value="add">
+                            <input type="hidden" name="productId" value="<%= product.getId() %>">
+                            <input type="hidden" name="redirect" value="/buyer/product-details?id=<%= product.getId() %>">
+                            <button type="submit" class="seller-secondary-button" style="width: 100%; text-align: center; padding: 0.65rem 1rem; font-size: 0.85rem; cursor: pointer;">
+                                ❤️ Save to Wishlist
+                            </button>
+                        </form>
+                    </div>
+
                     <div style="display: flex; gap: 15px; font-size: 0.85rem; font-weight: 700;">
                         <a href="${pageContext.request.contextPath}/buyer/marketplace" style="color: #000; text-decoration: underline;">← Back to Marketplace</a>
                         <span style="color: #ccc;">|</span>
-                        <a href="${pageContext.request.contextPath}/buyer/cart" style="color: #000; text-decoration: underline;">Go to My Cart →</a>
+                        <a href="${pageContext.request.contextPath}/buyer/wishlist" style="color: #000; text-decoration: underline;">View Wishlist →</a>
+                        <span style="color: #ccc;">|</span>
+                        <a href="${pageContext.request.contextPath}/buyer/cart" style="color: #000; text-decoration: underline;">Go to Cart →</a>
                     </div>
 
                 </div>
