@@ -1,6 +1,7 @@
 package com.sameer.sameermart.dao;
 
 import com.sameer.sameermart.config.DatabaseConfig;
+import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.Review;
 import com.sameer.sameermart.model.User;
@@ -141,7 +142,8 @@ public class ReviewDAOTest {
         Product product = productDAO.findBySellerId(seller.getId()).get(0);
 
         cartDAO.addItem(buyer.getId(), product.getId(), 2);
-        orderDAO.createOrderFromCart(buyer.getId());
+        Order order = orderDAO.createOrderFromCart(buyer.getId());
+        orderDAO.updateOrderStatus(order.getId(), "DELIVERED");
 
         return new PurchasedFixture(seller, buyer, product);
     }
@@ -149,6 +151,33 @@ public class ReviewDAOTest {
     // =========================================================
     // Tests
     // =========================================================
+
+    @Test
+    public void testReviewFailsWhenOrderNotDelivered() throws Exception {
+        User seller = newUser("Seller ND", "SELLER");
+        User buyer = newUser("Buyer ND", "BUYER");
+
+        productDAO.addProduct(new Product(
+                seller.getId(),
+                "Non-delivered Product",
+                "desc",
+                "General",
+                new BigDecimal("50.00"),
+                10
+        ));
+        Product product = productDAO.findBySellerId(seller.getId()).get(0);
+
+        cartDAO.addItem(buyer.getId(), product.getId(), 1);
+        Order order = orderDAO.createOrderFromCart(buyer.getId());
+        // Status is CONFIRMED, not DELIVERED
+
+        try {
+            reviewDAO.addReview(buyer.getId(), product.getId(), 5, "Too early");
+            Assert.fail("Review should fail if order is not delivered");
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage().contains("DELIVERED"));
+        }
+    }
 
     @Test
     public void testPurchasedBuyerCanSubmitValidReview() throws Exception {
@@ -301,10 +330,12 @@ public class ReviewDAOTest {
         Product product = productDAO.findBySellerId(seller.getId()).get(0);
 
         cartDAO.addItem(buyer1.getId(), product.getId(), 1);
-        orderDAO.createOrderFromCart(buyer1.getId());
+        Order o1 = orderDAO.createOrderFromCart(buyer1.getId());
+        orderDAO.updateOrderStatus(o1.getId(), "DELIVERED");
 
         cartDAO.addItem(buyer2.getId(), product.getId(), 1);
-        orderDAO.createOrderFromCart(buyer2.getId());
+        Order o2 = orderDAO.createOrderFromCart(buyer2.getId());
+        orderDAO.updateOrderStatus(o2.getId(), "DELIVERED");
 
         reviewDAO.addReview(buyer1.getId(), product.getId(), 4, "Very good");
         reviewDAO.addReview(buyer2.getId(), product.getId(), 2, "Could be better");
