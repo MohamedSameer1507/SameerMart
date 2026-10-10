@@ -6,6 +6,9 @@ import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.CsrfUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -28,6 +31,8 @@ import java.util.UUID;
         maxRequestSize = 1024 * 1024 * 10       // 10MB
 )
 public class AddProductServlet extends HttpServlet {
+
+    private static final Logger logger = LoggerFactory.getLogger(AddProductServlet.class);
 
     private ProductDAO productDAO;
 
@@ -272,7 +277,7 @@ public class AddProductServlet extends HttpServlet {
                 }
             }
         } catch (IOException | ServletException e) {
-            System.err.println("Error processing product image upload: " + e.getMessage());
+            logger.error("Error processing product image upload: {}", e.getMessage(), e);
         }
 
         // =========================

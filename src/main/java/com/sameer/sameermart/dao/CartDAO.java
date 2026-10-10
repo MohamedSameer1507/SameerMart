@@ -4,6 +4,9 @@ import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.CartItem;
 import com.sameer.sameermart.model.Product;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +18,7 @@ import java.util.List;
 
 public class CartDAO {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartDAO.class);
     private final ProductDAO productDAO = new ProductDAO();
 
     // =========================================================
@@ -192,14 +196,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error adding item to cart: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error adding item to cart: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -265,13 +262,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error loading cart: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error loading cart: {}", e.getMessage(), e);
         }
 
         return cartItems;
@@ -332,14 +323,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error updating cart quantity: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error updating cart quantity: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -381,14 +365,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error removing cart item: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error removing cart item: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -427,14 +404,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error clearing cart: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error clearing cart: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -494,13 +464,7 @@ public class CartDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error calculating cart total: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error calculating cart total: {}", e.getMessage(), e);
         }
 
         return total;

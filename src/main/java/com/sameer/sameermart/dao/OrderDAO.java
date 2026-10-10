@@ -200,7 +200,7 @@ public class OrderDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    logger.error("Error during transaction rollback: {}", ex.getMessage(), ex);
                 }
             }
             throw e;
@@ -210,7 +210,7 @@ public class OrderDAO {
                     connection.setAutoCommit(true);
                     connection.close();
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    logger.error("Error closing connection: {}", ex.getMessage(), ex);
                 }
             }
         }
@@ -256,8 +256,7 @@ public class OrderDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error finding buyer orders: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding buyer orders: {}", e.getMessage(), e);
         }
 
         return orders;
@@ -301,8 +300,7 @@ public class OrderDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error finding order by id: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding order by id: {}", e.getMessage(), e);
         }
 
         return null;
@@ -345,8 +343,7 @@ public class OrderDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error finding all orders: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding all orders: {}", e.getMessage(), e);
         }
 
         return orders;
@@ -409,8 +406,7 @@ public class OrderDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error finding order items: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding order items: {}", e.getMessage(), e);
         }
 
         return items;
@@ -470,8 +466,7 @@ public class OrderDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding seller orders: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding seller orders: {}", e.getMessage(), e);
         }
 
         return items;
@@ -499,8 +494,7 @@ public class OrderDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error calculating seller revenue: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error calculating seller revenue: {}", e.getMessage(), e);
         }
 
         return BigDecimal.ZERO;
@@ -527,8 +521,7 @@ public class OrderDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error counting seller orders: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting seller orders: {}", e.getMessage(), e);
         }
 
         return 0;
@@ -680,8 +673,7 @@ public class OrderDAO {
                 return rev != null ? rev : BigDecimal.ZERO;
             }
         } catch (SQLException e) {
-            System.err.println("Error calculating platform revenue: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error calculating platform revenue: {}", e.getMessage(), e);
         }
         return BigDecimal.ZERO;
     }
@@ -699,8 +691,7 @@ public class OrderDAO {
                 return rs.getInt("total_count");
             }
         } catch (SQLException e) {
-            System.err.println("Error counting platform orders: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting platform orders: {}", e.getMessage(), e);
         }
         return 0;
     }
@@ -721,8 +712,7 @@ public class OrderDAO {
             statement.setInt(2, orderId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error updating order status: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error updating order status: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -754,8 +744,7 @@ public class OrderDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding order by id: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding order by id: {}", e.getMessage(), e);
         }
         return null;
     }
@@ -779,8 +768,7 @@ public class OrderDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.err.println("Error checking seller order ownership: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error checking seller order ownership: {}", e.getMessage(), e);
             return false;
         }
     }

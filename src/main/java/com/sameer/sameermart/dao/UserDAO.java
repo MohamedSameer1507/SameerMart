@@ -3,6 +3,8 @@ package com.sameer.sameermart.dao;
 import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.User;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
     // =====================================================
     // FIND USER BY EMAIL
@@ -50,13 +54,7 @@ public class UserDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding user by email: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding user by email: {}", e.getMessage(), e);
         }
 
         return null;
@@ -100,13 +98,7 @@ public class UserDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding user by id: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding user by id: {}", e.getMessage(), e);
         }
 
         return null;
@@ -151,14 +143,7 @@ public class UserDAO {
             return rows > 0;
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error registering user: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error registering user: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -200,13 +185,7 @@ public class UserDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding all users: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding all users: {}", e.getMessage(), e);
         }
 
         return users;

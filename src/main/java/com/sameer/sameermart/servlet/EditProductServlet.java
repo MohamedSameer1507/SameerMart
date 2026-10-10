@@ -6,6 +6,9 @@ import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.CsrfUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -33,6 +36,8 @@ import java.util.UUID;
         maxRequestSize = 1024 * 1024 * 10       // 10MB
 )
 public class EditProductServlet extends HttpServlet {
+
+    private static final Logger logger = LoggerFactory.getLogger(EditProductServlet.class);
 
     private ProductDAO productDAO;
 
@@ -216,7 +221,7 @@ public class EditProductServlet extends HttpServlet {
                 }
             }
         } catch (IOException | ServletException e) {
-            System.err.println("Error processing edit product image upload: " + e.getMessage());
+            logger.error("Error processing edit product image upload: {}", e.getMessage(), e);
         }
 
         Product product = new Product(
@@ -274,7 +279,7 @@ public class EditProductServlet extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Could not safely delete old product image: " + e.getMessage());
+            logger.error("Could not safely delete old product image: {}", e.getMessage(), e);
         }
     }
 }

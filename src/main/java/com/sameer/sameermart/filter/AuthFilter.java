@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 @WebFilter(urlPatterns = {
@@ -25,13 +28,12 @@ import java.io.IOException;
 })
 public class AuthFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
+
     @Override
     public void init(FilterConfig filterConfig)
             throws ServletException {
-
-        System.out.println("=================================");
-        System.out.println("AuthFilter initialized");
-        System.out.println("=================================");
+        logger.info("AuthFilter initialized");
     }
 
 
@@ -187,8 +189,6 @@ public class AuthFilter implements Filter {
 
     @Override
     public void destroy() {
-
-        System.out.println("AuthFilter destroyed");
-
+        logger.info("AuthFilter destroyed");
     }
 }

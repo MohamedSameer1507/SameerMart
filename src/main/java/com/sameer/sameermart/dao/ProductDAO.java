@@ -2,6 +2,8 @@ package com.sameer.sameermart.dao;
 
 import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.Product;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductDAO.class);
 
     // =========================================================
     // CREATE PRODUCT
@@ -47,14 +51,7 @@ public class ProductDAO {
             return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error adding product: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error adding product: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -99,13 +96,7 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding product: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding product: {}", e.getMessage(), e);
         }
 
         return null;
@@ -156,13 +147,7 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding seller product: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding seller product: {}", e.getMessage(), e);
         }
 
         return null;
@@ -218,13 +203,7 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding seller products: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding seller products: {}", e.getMessage(), e);
         }
 
         return products;
@@ -273,13 +252,7 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding products: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding products: {}", e.getMessage(), e);
         }
 
         return products;
@@ -330,13 +303,7 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding available products: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding available products: {}", e.getMessage(), e);
         }
 
         return products;
@@ -363,8 +330,7 @@ public class ProductDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding products by category: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error finding products by category: {}", e.getMessage(), e);
         }
         return products;
     }
@@ -389,8 +355,7 @@ public class ProductDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error searching products: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error searching products: {}", e.getMessage(), e);
         }
         return products;
     }
@@ -435,14 +400,7 @@ public class ProductDAO {
             return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error updating product: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error updating product: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -576,34 +534,23 @@ public class ProductDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error deleting product: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error deleting product: {}", e.getMessage(), e);
             if (connection != null) {
-
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
-                    rollbackException.printStackTrace();
+                    logger.error("Error rolling back product deletion: {}", rollbackException.getMessage(), rollbackException);
                 }
             }
-
             return DeletionResult.ERROR;
 
         } finally {
-
             if (connection != null) {
-
                 try {
                     connection.setAutoCommit(true);
                     connection.close();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    logger.error("Error closing connection after product deletion: {}", e.getMessage(), e);
                 }
             }
         }
@@ -638,14 +585,7 @@ public class ProductDAO {
             return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error updating product stock: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error updating product stock: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -734,8 +674,7 @@ public class ProductDAO {
             statement.setInt(2, productId);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error toggling product active status: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error toggling product active status: {}", e.getMessage(), e);
             return false;
         }
     }

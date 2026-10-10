@@ -6,6 +6,9 @@ import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.CsrfUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/buyer/review")
 public class ReviewServlet extends HttpServlet {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReviewServlet.class);
 
     private static final int MAX_REVIEW_TEXT_LENGTH = 500;
 
@@ -163,9 +168,7 @@ public class ReviewServlet extends HttpServlet {
             );
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-
+            logger.error("Error submitting review: {}", e.getMessage(), e);
             response.sendRedirect(
                     redirectBase
                             + "&error=Unable+to+submit+review.+Please+try+again."

@@ -2,6 +2,8 @@ package com.sameer.sameermart.dao;
 
 import com.sameer.sameermart.config.DatabaseConfig;
 import com.sameer.sameermart.model.Review;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDAO {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(ReviewDAO.class);
 
     // =====================================================
     // HAS THE BUYER PURCHASED THE PRODUCT (ANY STATUS)?
@@ -40,8 +45,7 @@ public class ReviewDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking any purchase order: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error checking any purchase order: {}", e.getMessage(), e);
         }
         return false;
     }
@@ -87,13 +91,7 @@ public class ReviewDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error checking purchase eligibility: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error checking purchase eligibility: {}", e.getMessage(), e);
         }
 
         return false;
@@ -138,13 +136,7 @@ public class ReviewDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error checking existing review: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error checking existing review: {}", e.getMessage(), e);
         }
 
         return false;
@@ -264,14 +256,7 @@ public class ReviewDAO {
             return null;
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error adding review: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+            logger.error("Error adding review: {}", e.getMessage(), e);
             throw new IllegalStateException(
                     "Unable to submit review. Please try again."
             );
@@ -324,13 +309,7 @@ public class ReviewDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error finding reviews: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error finding reviews: {}", e.getMessage(), e);
         }
 
         return reviews;
@@ -375,13 +354,7 @@ public class ReviewDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error calculating average rating: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error calculating average rating: {}", e.getMessage(), e);
         }
 
         return 0.0;
@@ -421,13 +394,7 @@ public class ReviewDAO {
             }
 
         } catch (SQLException e) {
-
-            System.err.println(
-                    "Error counting reviews: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
+            logger.error("Error counting reviews: {}", e.getMessage(), e);
         }
 
         return 0;

@@ -7,6 +7,9 @@ import com.sameer.sameermart.model.Order;
 import com.sameer.sameermart.model.User;
 import com.sameer.sameermart.util.CsrfUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,6 +25,8 @@ import java.util.List;
 
 @WebServlet({"/buyer/checkout", "/buyer/orders", "/buyer/order", "/buyer/place-order", "/OrderServlet"})
 public class OrderServlet extends HttpServlet {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderServlet.class);
 
     private OrderDAO orderDAO;
     private CartDAO cartDAO;
@@ -134,7 +139,7 @@ public class OrderServlet extends HttpServlet {
             String safeMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             response.sendRedirect(request.getContextPath() + "/buyer/cart?error=" + safeMsg);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error creating order from cart: {}", e.getMessage(), e);
             response.sendRedirect(request.getContextPath() + "/buyer/cart?error=Unable+to+place+order.+Please+try+again.");
         }
     }
