@@ -75,11 +75,11 @@
                 <div class="message error"><%= safeError %></div>
             <% } %>
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">FINAL STEP</span>
-                    <h1>Confirm & Place Order</h1>
-                    <p>Please review your purchase items and shipping details before completing your order.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">💳 ATOMIC CHECKOUT</span>
+                    <h1>Confirm & Place <span class="highlight">Order</span></h1>
+                    <p>Please review your purchase items, verified buyer profile, and shipping summary before finalizing.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/buyer/cart" class="seller-secondary-button">
                     ← Edit Cart
@@ -203,7 +203,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

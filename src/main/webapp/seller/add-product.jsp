@@ -47,9 +47,9 @@
     <main class="page">
         <div class="register-card product-form-card">
             <div class="card-header">
-                <span class="eyebrow">SELLER PANEL</span>
-                <h2>Add Product</h2>
-                <p class="subtitle">Create a new marketplace listing with photos & pricing</p>
+                <span class="eyebrow">✨ PUBLISH NEW PRODUCT</span>
+                <h2>Add <span class="highlight">Product</span></h2>
+                <p class="subtitle">Create a fresh marketplace listing with photos, inventory & pricing</p>
             </div>
 
             <% if (error != null && !error.trim().isEmpty()) {
@@ -117,7 +117,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

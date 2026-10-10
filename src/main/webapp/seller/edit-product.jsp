@@ -79,8 +79,8 @@
     <main class="page">
         <div class="register-card product-form-card">
             <div class="card-header">
-                <span class="eyebrow">SELLER PANEL</span>
-                <h2>Edit Product #<%= product.getId() %></h2>
+                <span class="eyebrow">✏️ UPDATE INVENTORY LISTING</span>
+                <h2>Edit <span class="highlight">Product #<%= product.getId() %></span></h2>
                 <p class="subtitle">Update listing details, pricing, stock quantity, and photo</p>
             </div>
 
@@ -160,7 +160,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

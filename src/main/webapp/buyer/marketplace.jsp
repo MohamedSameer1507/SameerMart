@@ -79,11 +79,11 @@
             <% } %>
 
             <!-- Marketplace Header -->
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">MARKETPLACE</span>
-                    <h1>Browse Products</h1>
-                    <p>Discover fresh listings from verified sellers and add items to your cart.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🛍️ VERIFIED MULTI-VENDOR MARKETPLACE</span>
+                    <h1>Explore & Buy Direct with <span class="highlight">Confidence</span></h1>
+                    <p>Discover fresh listings from verified sellers. Real-time inventory tracking, atomic checkout, and 24/7 AI assistance.</p>
                 </div>
                 <div class="seller-role-badge">
                     ROLE: <%= role %>
@@ -174,7 +174,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
     <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>

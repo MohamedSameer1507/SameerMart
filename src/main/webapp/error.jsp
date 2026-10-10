@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error - SameerMart</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828_4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261010_2">
 </head>
 <body>
 
@@ -23,27 +23,27 @@
     <main class="page">
         <div class="auth-card" style="max-width: 520px; text-align: center;">
             <div class="auth-header">
-                <span class="eyebrow" style="color: #c0392b;">REQUEST NOTICE</span>
-                <h2>Something Went Wrong</h2>
+                <span class="eyebrow" style="background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border);">⚠️ REQUEST NOTICE</span>
+                <h2>Oops! Something <span class="highlight">Went Wrong</span></h2>
             </div>
 
-            <p style="color: #555; margin: 1rem 0 1.8rem; line-height: 1.6; font-size: 0.95rem;">
+            <p style="color: var(--text-muted); margin: 1rem 0 2rem; line-height: 1.6; font-size: 0.95rem;">
                 The request could not be completed as expected. An error was encountered while processing your request. Please return to the homepage or try again shortly.
             </p>
 
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="${pageContext.request.contextPath}/" class="primary-button" style="display: inline-block; text-decoration: none; padding: 0.85rem 1.5rem;">
-                    Go to Homepage
+                <a href="${pageContext.request.contextPath}/" class="btn-link">
+                    <button type="button" class="primary-button">Go to Homepage →</button>
                 </a>
-                <a href="javascript:history.back()" class="secondary-button" style="display: inline-block; text-decoration: none; padding: 0.85rem 1.5rem;">
-                    Go Back
+                <a href="javascript:history.back()" class="btn-link">
+                    <span class="secondary-button">Go Back</span>
                 </a>
             </div>
         </div>
     </main>
 
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

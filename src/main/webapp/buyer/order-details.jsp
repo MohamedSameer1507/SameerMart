@@ -51,7 +51,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order #<%= order.getId() %> Details - SameerMart</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828_4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261010_2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css?v=20261010_2">
 </head>
 <body>
 
@@ -72,11 +73,11 @@
     <main class="seller-page">
         <div class="seller-container">
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">ORDER DETAILS</span>
-                    <h1>Order #<%= order.getId() %></h1>
-                    <p>Detailed receipt and purchased product information for this order.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🧾 RECEIPT & FULFILLMENT</span>
+                    <h1>Order <span class="highlight">#<%= order.getId() %></span> Details</h1>
+                    <p>Detailed receipt, pricing breakdown, and purchased product information for this order.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/buyer/orders" class="seller-secondary-button">
                     ← Back to Orders
@@ -84,18 +85,18 @@
             </section>
 
             <div class="products-panel">
-                <div class="products-panel-header" style="background: #fafafa; border-bottom: 2px solid #000; padding: 1.2rem 1.5rem;">
+                <div class="products-panel-header" style="background: var(--bg-surface-alt); border-bottom: 1px solid var(--border); padding: 1.2rem 1.6rem;">
                     <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Order Placed</span>
-                            <strong><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Recently" %></strong>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Order Placed</span>
+                            <strong style="color: var(--text-main);"><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Recently" %></strong>
                         </div>
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Total Amount</span>
-                            <strong style="color: #000; font-size: 1.1rem;">₹<%= order.getTotalAmount() %></strong>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Total Amount</span>
+                            <strong style="color: var(--primary); font-size: 1.15rem;">₹<%= order.getTotalAmount() %></strong>
                         </div>
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Status</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px; margin-bottom: 3px;">Status</span>
                             <%
                                 String odStatus = order.getStatus() != null ? order.getStatus().trim().toUpperCase() : "CONFIRMED";
                                 String odStatusClass = "status-" + odStatus.toLowerCase();
@@ -168,8 +169,9 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>

@@ -42,7 +42,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - SameerMart</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828_4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261010_2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css?v=20261010_2">
 </head>
 <body>
 
@@ -64,14 +65,14 @@
     <main class="seller-page">
         <div class="seller-container">
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">ORDER HISTORY</span>
-                    <h1>My Placed Orders</h1>
-                    <p>Track all past and current orders placed with SameerMart sellers.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">📦 ORDER TRACKING & HISTORY</span>
+                    <h1>My Placed <span class="highlight">Orders</span></h1>
+                    <p>Track delivery progression, order references, verified reviews, and past purchase history.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-primary-button">
-                    Browse Marketplace
+                    Browse Marketplace →
                 </a>
             </section>
 
@@ -173,8 +174,9 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>

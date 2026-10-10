@@ -42,7 +42,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmation - SameerMart</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828_4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261010_2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css?v=20261010_2">
 </head>
 <body>
 
@@ -64,12 +65,12 @@
         <div class="seller-container" style="max-width: 800px;">
 
             <!-- Success Banner Card -->
-            <div class="seller-status-card" style="padding: 2.5rem; text-align: center; display: block; background: #fff; margin-bottom: 2rem;">
-                <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🎉</div>
-                <span class="eyebrow" style="color: #2e7d32;">PAYMENT & ORDER CONFIRMED</span>
-                <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0.3rem 0 0.8rem;">Thank You For Your Order!</h1>
-                <p style="color: #666; max-width: 480px; margin: 0 auto 1.5rem; font-size: 0.95rem;">
-                    Your order has been successfully placed with the sellers and the inventory has been updated.
+            <div class="seller-stat-card" style="padding: 2.8rem; text-align: center; display: block; margin-bottom: 2rem;">
+                <div style="font-size: 3.8rem; margin-bottom: 0.8rem;">🎉</div>
+                <span class="eyebrow">✅ PAYMENT & ORDER CONFIRMED</span>
+                <h1 style="font-size: 2.4rem; font-weight: 800; margin: 0.4rem 0 0.8rem; letter-spacing: -0.8px;">Thank You for Your <span class="highlight">Order!</span></h1>
+                <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto 1.8rem; font-size: 1rem; line-height: 1.6;">
+                    Your transaction completed successfully. Inventory was decremented atomically and sellers are preparing fulfillment.
                 </p>
 
                 <% if (order != null) { %>
@@ -162,8 +163,9 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>

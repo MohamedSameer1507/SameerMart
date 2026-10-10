@@ -106,11 +106,11 @@
             <% } %>
 
             <!-- Seller Header -->
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">SELLER PANEL</span>
-                    <h1>Welcome, <%= HtmlUtil.escape(userName) %></h1>
-                    <p>Manage your products, monitor inventory stock, and grow your marketplace sales.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🏪 SELLER INTELLIGENCE DASHBOARD</span>
+                    <h1>Welcome Back, <span class="highlight"><%= HtmlUtil.escape(userName) %></span></h1>
+                    <p>Manage your products, monitor inventory stock levels, and grow your multi-vendor marketplace sales.</p>
                 </div>
                 <div class="seller-role-badge">
                     ROLE: <%= role %>
@@ -357,7 +357,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
     <!-- Chart.js Visualization Scripts (Option O3) -->

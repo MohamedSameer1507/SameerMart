@@ -147,8 +147,8 @@
 
                 <!-- Product Info & Order Section -->
                 <div class="product-details-info">
-                    <span class="eyebrow"><%= product.getCategory() != null ? HtmlUtil.escape(product.getCategory().toUpperCase()) : "GENERAL" %> &bull; ITEM #<%= product.getId() %></span>
-                    <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.3rem 0 0.8rem; letter-spacing: -0.5px; color: var(--text-main);"><%= HtmlUtil.escape(product.getName()) %></h1>
+                    <span class="eyebrow">🛍️ <%= product.getCategory() != null ? HtmlUtil.escape(product.getCategory().toUpperCase()) : "GENERAL" %> &bull; ITEM #<%= product.getId() %></span>
+                    <h1 style="font-size: 2.3rem; font-weight: 800; margin: 0.3rem 0 0.8rem; letter-spacing: -0.5px; color: var(--text-main);"><%= HtmlUtil.escape(product.getName()) %></h1>
 
                     <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 1.2rem;">
                         <span style="font-size: 2.2rem; font-weight: 900; color: var(--primary); letter-spacing: -0.5px;">₹<%= product.getPrice() %></span>
@@ -348,7 +348,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
     <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>

@@ -82,11 +82,11 @@
             <% } %>
 
             <!-- Cart Header -->
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">ORDER REVIEW</span>
-                    <h1>Shopping Cart</h1>
-                    <p>Review items in your cart, adjust quantities, and proceed to checkout.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🛒 ORDER REVIEW & CART</span>
+                    <h1>Your Shopping <span class="highlight">Cart</span></h1>
+                    <p>Review items in your cart, adjust quantities with real-time stock limits, and proceed to checkout.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-secondary-button">
                     ← Continue Shopping
@@ -243,7 +243,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
     <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>

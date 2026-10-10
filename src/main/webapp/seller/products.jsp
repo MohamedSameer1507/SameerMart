@@ -71,11 +71,11 @@
                 <div class="message error"><%= safeError %></div>
             <% } %>
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">SELLER PANEL</span>
-                    <h1>My Product Inventory</h1>
-                    <p>Manage, edit, and review all products listed under your seller account.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">📦 INVENTORY & CATALOG</span>
+                    <h1>My Product <span class="highlight">Inventory</span></h1>
+                    <p>Manage, edit, review photos, and track inventory for all products listed under your seller account.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/seller/add-product.jsp" class="seller-primary-button">
                     + Add New Product
@@ -172,7 +172,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

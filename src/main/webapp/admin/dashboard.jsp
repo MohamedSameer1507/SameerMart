@@ -102,11 +102,11 @@
                 <div class="message error"><%= safeError %></div>
             <% } %>
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">ADMINISTRATOR CONTROL PANEL</span>
-                    <h1>Welcome, <%= HtmlUtil.escape(userName) %></h1>
-                    <p>Global oversight of registered users, seller catalogs, orders, and marketplace platform metrics.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🛡️ ADMINISTRATOR PLATFORM GOVERNANCE</span>
+                    <h1>Welcome, <span class="highlight"><%= HtmlUtil.escape(userName) %></span></h1>
+                    <p>Global oversight of registered users, multi-vendor seller catalogs, atomic orders, and platform metrics.</p>
                 </div>
                 <div class="seller-role-badge">
                     ROLE: <%= role %>
@@ -321,7 +321,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>

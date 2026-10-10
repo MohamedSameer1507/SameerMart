@@ -77,11 +77,11 @@
             <% } %>
 
             <!-- Wishlist Header -->
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">SAVED ITEMS</span>
-                    <h1>My Wishlist</h1>
-                    <p>Save products to purchase later or move them directly to your shopping cart.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">❤️ SAVED FOR LATER</span>
+                    <h1>My Personal <span class="highlight">Wishlist</span></h1>
+                    <p>Save products to purchase later or move them directly to your shopping cart with one click.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-secondary-button">
                     ← Browse Marketplace
@@ -190,9 +190,11 @@
         </div>
     </main>
 
-    <!-- Chat Widget Root -->
-    <div id="chat-widget-root"></div>
-    <script src="${pageContext.request.contextPath}/js/chat-widget.js"></script>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
+    </footer>
 
+    <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>
 </body>
 </html>

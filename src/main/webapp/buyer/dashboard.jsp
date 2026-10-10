@@ -32,8 +32,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buyer Dashboard - SameerMart</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20260828">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261010_2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat-widget.css?v=20261010_2">
 </head>
 <body>
 
@@ -55,28 +55,27 @@
     <main class="seller-page">
         <div class="seller-container">
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">BUYER PANEL</span>
-                    <h1>Welcome, <%= HtmlUtil.escape(userName) %></h1>
-                    <p>Explore agricultural listings, connect with verified sellers, and manage your orders.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🛍️ BUYER ACCOUNT HUB</span>
+                    <h1>Welcome, <span class="highlight"><%= HtmlUtil.escape(userName) %></span></h1>
+                    <p>Explore multi-vendor listings, connect with verified sellers, track deliveries, and manage your orders.</p>
                 </div>
                 <div class="seller-role-badge">
                     ROLE: <%= role %>
                 </div>
             </section>
 
-            <section class="seller-status-card">
+            <section class="feature-card" style="display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
                 <div>
-                    <span class="eyebrow">MARKETPLACE</span>
-                    <h2>Browse Marketplace Products</h2>
-                    <p>Explore products listed by sellers, add items to your cart, and place orders directly.</p>
+                    <span class="eyebrow">🏪 LIVE CATALOG</span>
+                    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin: 0.3rem 0;">Browse Marketplace Products</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Explore items listed by sellers, add to your cart with real-time stock verification, and place orders directly.</p>
                 </div>
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-primary-button">
                         Browse Marketplace →
                     </a>
-                    <span class="status-badge">ACTIVE</span>
                 </div>
             </section>
 
@@ -85,7 +84,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
     <script src="${pageContext.request.contextPath}/js/chat-widget.js" defer></script>

@@ -81,11 +81,11 @@
                 <div class="message error" style="margin-bottom: 1.5rem;"><%= HtmlUtil.escape(error) %></div>
             <% } %>
 
-            <section class="seller-header">
-                <div class="seller-introduction">
-                    <span class="eyebrow">SELLER PANEL</span>
-                    <h1>Customer Orders</h1>
-                    <p>Review orders placed by buyers for your listed products and monitor fulfilled sales.</p>
+            <section class="page-hero">
+                <div class="page-hero-intro">
+                    <span class="eyebrow">🚚 FULFILLMENT & ORDERS</span>
+                    <h1>Customer <span class="highlight">Orders</span></h1>
+                    <p>Review customer orders placed for your listed products, manage shipping status, and monitor fulfilled sales.</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/seller/products.jsp" class="seller-secondary-button">
                     View Inventory
@@ -243,7 +243,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2026 SameerMart. All rights reserved.</p>
+        <p>© 2026 SameerMart. Designed with modern Java 17 & Servlets for Anna University Capstone.</p>
     </footer>
 
 </body>
