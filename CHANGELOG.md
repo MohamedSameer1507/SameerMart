@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-10-10
+
+### Added
+- **"Aurora Indigo" 2026 Modern Design System & Theme**:
+  - Replaced the high-contrast retro-brutalist theme (harsh black borders, 0px radius, flat drop shadows) with an ultra-modern, high-conversion e-commerce design system across all views.
+  - Design tokens (`--primary: #4f46e5`, `--primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)`, soft elevations `--shadow-sm` through `--shadow-xl`, rounded geometry `--radius-xs` to `--radius-pill`).
+  - Modern typography: `Plus Jakarta Sans` paired with `Inter`.
+  - Glassmorphic sticky topbar navigation with backdrop blur filter, brand logo, and active pill links.
+  - Modernized AI Chat Widget: Glowing indigo/violet orb launcher with animated ping halo, rounded message bubbles, and smooth slide-up panel.
+  - Dedicated modern e-commerce component classes: `.product-grid`, `.product-card`, `.product-card-media` (with subtle hover zoom), `.product-card-body`, `.product-card-title`, `.product-card-price`, `.stock-pill`, `.btn-card-action`.
+  - Polished view layouts:
+    - Landing page (`index.jsp`): Modern hero with gradient headlines, pill tag, feature cards, and role-oriented CTA buttons.
+    - Buyer marketplace (`buyer/marketplace.jsp`): Clean responsive product grid with smooth hover lifts and stock badges.
+    - Product details (`buyer/product-details.jsp`): Split media and order configuration panel with modern quantity steppers.
+    - Shopping cart & checkout (`buyer/cart.jsp`, `buyer/checkout.jsp`, `buyer/order-success.jsp`): Elegant item tables, order breakdown summary card, and streamlined checkout actions.
+    - Orders & Wishlist (`buyer/orders.jsp`, `buyer/wishlist.jsp`): Clean order history cards, status badges, and empty-state placeholders.
+    - Seller & Admin Dashboards (`seller/dashboard.jsp`, `admin/dashboard.jsp`): Soft KPI cards, clean chart containers, and structured data tables.
+  - Zero breaking changes to controller routing, form actions, or CSRF tokens; 100% automated test suite passing (244/244 tests).
+
+---
+
 ## [1.2.0] - 2026-10-10
 
 ### Added

@@ -136,39 +136,36 @@
                 <div class="message error"><%= safeError %></div>
             <% } %>
 
-            <div class="seller-status-card" style="padding: 2.5rem; display: flex; gap: 2.5rem; align-items: flex-start; flex-wrap: wrap;">
+            <div class="product-details-container">
 
                 <!-- Product Image Section -->
-                <div style="flex: 1; min-width: 280px; max-width: 380px;">
-                    <div style="width: 100%; height: 320px; background: #f0f0f0; border: 2px solid #000; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px #000;">
-                        <img src="<%= imgSrc %>"
-                             alt="<%= HtmlUtil.escape(product.getName()) %>"
-                             style="width: 100%; height: 100%; object-fit: cover;"
-                             onerror="this.src='${pageContext.request.contextPath}/images/default-product.svg';">
-                    </div>
+                <div class="product-details-media">
+                    <img src="<%= imgSrc %>"
+                         alt="<%= HtmlUtil.escape(product.getName()) %>"
+                         onerror="this.src='${pageContext.request.contextPath}/images/default-product.svg';">
                 </div>
 
                 <!-- Product Info & Order Section -->
-                <div style="flex: 1.2; min-width: 280px;">
+                <div class="product-details-info">
                     <span class="eyebrow"><%= product.getCategory() != null ? HtmlUtil.escape(product.getCategory().toUpperCase()) : "GENERAL" %> &bull; ITEM #<%= product.getId() %></span>
-                    <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.3rem 0 0.8rem; letter-spacing: -0.5px;"><%= HtmlUtil.escape(product.getName()) %></h1>
+                    <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.3rem 0 0.8rem; letter-spacing: -0.5px; color: var(--text-main);"><%= HtmlUtil.escape(product.getName()) %></h1>
 
                     <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 1.2rem;">
-                        <span style="font-size: 2.2rem; font-weight: 900; color: #000;">₹<%= product.getPrice() %></span>
-                        <span style="color: #666; font-size: 0.9rem;">/ unit</span>
+                        <span style="font-size: 2.2rem; font-weight: 900; color: var(--primary); letter-spacing: -0.5px;">₹<%= product.getPrice() %></span>
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">/ unit</span>
                     </div>
 
                     <div style="margin-bottom: 1.5rem;">
                         <% if (inStock) { %>
-                            <span class="status-badge" style="background: #2e7d32; color: #fff;">IN STOCK: <%= product.getQuantity() %> UNITS AVAILABLE</span>
+                            <span class="stock-pill in-stock">IN STOCK: <%= product.getQuantity() %> UNITS AVAILABLE</span>
                         <% } else { %>
-                            <span class="status-badge" style="background: #c62828; color: #fff;">OUT OF STOCK</span>
+                            <span class="stock-pill out-of-stock">OUT OF STOCK</span>
                         <% } %>
                     </div>
 
-                    <div style="margin-bottom: 1.8rem; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 1.2rem 0;">
-                        <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 0.5rem;">Product Description</h4>
-                        <p style="font-size: 0.95rem; line-height: 1.6; color: #333;">
+                    <div style="margin-bottom: 1.8rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.2rem 0;">
+                        <h4 style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700;">Product Description</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-body);">
                             <%= (product.getDescription() != null && !product.getDescription().trim().isEmpty()) ? HtmlUtil.escape(product.getDescription()) : "No detailed description provided by the seller." %>
                         </p>
                     </div>
@@ -180,27 +177,27 @@
                             <input type="hidden" name="productId" value="<%= product.getId() %>">
 
                             <div style="display: flex; align-items: flex-end; gap: 14px; margin-bottom: 1.5rem;">
-                                <div style="width: 110px;">
-                                    <label for="quantity" style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Quantity</label>
+                                <div>
+                                    <label for="quantity" style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Quantity</label>
                                     <input type="number"
                                            id="quantity"
                                            name="quantity"
                                            value="1"
                                            min="1"
                                            max="<%= product.getQuantity() %>"
-                                           style="width: 100%; padding: 0.75rem; border: 2px solid #000; font-size: 1rem; font-weight: 700; text-align: center;"
+                                           class="quantity-stepper-input"
                                            required>
                                 </div>
 
                                 <div style="flex: 1;">
-                                    <button type="submit" class="primary-button" style="padding: 0.85rem; width: 100%; box-shadow: 4px 4px 0px #000;">
+                                    <button type="submit" class="primary-button" style="padding: 0.85rem; width: 100%;">
                                         + Add to Cart
                                     </button>
                                 </div>
                             </div>
                         </form>
                     <% } else { %>
-                        <div style="padding: 1rem; background: #fff5f5; border: 1.5px solid #c0392b; color: #8b1e14; font-weight: 700; text-align: center; margin-bottom: 1.5rem;">
+                        <div class="message error" style="margin-bottom: 1.5rem;">
                             This item is currently out of stock. Please check back later!
                         </div>
                     <% } %>
@@ -211,18 +208,18 @@
                             <input type="hidden" name="action" value="add">
                             <input type="hidden" name="productId" value="<%= product.getId() %>">
                             <input type="hidden" name="redirect" value="/buyer/product-details?id=<%= product.getId() %>">
-                            <button type="submit" class="seller-secondary-button" style="width: 100%; text-align: center; padding: 0.65rem 1rem; font-size: 0.85rem; cursor: pointer;">
+                            <button type="submit" class="seller-secondary-button" style="width: 100%; text-align: center; padding: 0.75rem 1rem; font-size: 0.88rem; cursor: pointer;">
                                 ❤️ Save to Wishlist
                             </button>
                         </form>
                     </div>
 
-                    <div style="display: flex; gap: 15px; font-size: 0.85rem; font-weight: 700;">
-                        <a href="${pageContext.request.contextPath}/buyer/marketplace" style="color: #000; text-decoration: underline;">← Back to Marketplace</a>
-                        <span style="color: #ccc;">|</span>
-                        <a href="${pageContext.request.contextPath}/buyer/wishlist" style="color: #000; text-decoration: underline;">View Wishlist →</a>
-                        <span style="color: #ccc;">|</span>
-                        <a href="${pageContext.request.contextPath}/buyer/cart" style="color: #000; text-decoration: underline;">Go to Cart →</a>
+                    <div style="display: flex; gap: 15px; font-size: 0.88rem; font-weight: 700; color: var(--text-muted);">
+                        <a href="${pageContext.request.contextPath}/buyer/marketplace">← Back to Marketplace</a>
+                        <span>&bull;</span>
+                        <a href="${pageContext.request.contextPath}/buyer/wishlist">View Wishlist →</a>
+                        <span>&bull;</span>
+                        <a href="${pageContext.request.contextPath}/buyer/cart">Go to Cart →</a>
                     </div>
 
                 </div>

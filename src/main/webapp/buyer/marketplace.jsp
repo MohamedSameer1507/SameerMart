@@ -91,10 +91,10 @@
             </section>
 
             <% if (products == null || products.isEmpty()) { %>
-                <div class="empty-state" style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; padding: 4rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
+                <div class="empty-state">
+                    <div style="font-size: 3.5rem; margin-bottom: 1.2rem;">🛍️</div>
                     <h2>No Products Available</h2>
-                    <p style="color: #666; max-width: 420px; margin: 0.5rem auto 1.5rem;">
+                    <p>
                         There are no active listings available right now. Please check back later!
                     </p>
                     <a href="${pageContext.request.contextPath}/buyer/orders" class="seller-primary-button">
@@ -102,7 +102,7 @@
                     </a>
                 </div>
             <% } else { %>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem;">
+                <div class="product-grid">
                     <% for (Product p : products) {
                         String pImg = "default-product.svg";
                         try {
@@ -113,54 +113,51 @@
                         String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
                         boolean inStock = p.getQuantity() > 0;
                     %>
-                        <div style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; display: flex; flex-direction: column; overflow: hidden;">
+                        <div class="product-card">
                             <!-- Product Image -->
-                            <div style="height: 180px; background: #f0f0f0; border-bottom: 2px solid #000; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            <div class="product-card-media">
                                 <img src="<%= imgSrc %>"
                                      alt="<%= HtmlUtil.escape(p.getName()) %>"
-                                     style="width: 100%; height: 100%; object-fit: cover;"
                                      onerror="this.src='${pageContext.request.contextPath}/images/default-product.svg';">
                             </div>
 
                             <!-- Product Info -->
-                            <div style="padding: 1.2rem; display: flex; flex-direction: column; flex: 1;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7rem;">
+                            <div class="product-card-body">
+                                <div class="product-card-header">
                                     <span class="category-chip"><%= HtmlUtil.escape(p.getCategory()) %></span>
-                                    <span style="font-size: 0.72rem; color: #888; font-weight: 700;">#<%= p.getId() %></span>
+                                    <span class="product-card-id">#<%= p.getId() %></span>
                                 </div>
 
-                                <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.3rem;"><%= HtmlUtil.escape(p.getName()) %></h3>
+                                <h3 class="product-card-title"><%= HtmlUtil.escape(p.getName()) %></h3>
 
-                                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 0.6rem;">
-                                    <span style="font-size: 1.5rem; font-weight: 900; color: #000;">₹<%= p.getPrice() %></span>
-                                    <span style="color: #666; font-size: 0.8rem;">/ unit</span>
+                                <div class="product-card-price-row">
+                                    <span class="product-card-price">₹<%= p.getPrice() %></span>
+                                    <span class="product-card-unit">/ unit</span>
                                 </div>
 
-                                <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin-bottom: 1rem; flex: 1;
-                                   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                <p class="product-card-desc">
                                     <%= (p.getDescription() != null && !p.getDescription().trim().isEmpty()) ? HtmlUtil.escape(p.getDescription()) : "No detailed description provided by the seller." %>
                                 </p>
 
                                 <% if (inStock) { %>
-                                    <span class="status-badge" style="background: #2e7d32; color: #fff; align-self: flex-start; margin-bottom: 1rem;">IN STOCK: <%= p.getQuantity() %></span>
+                                    <span class="stock-pill in-stock">IN STOCK: <%= p.getQuantity() %></span>
                                 <% } else { %>
-                                    <span class="status-badge" style="background: #c62828; color: #fff; align-self: flex-start; margin-bottom: 1rem;">OUT OF STOCK</span>
+                                    <span class="stock-pill out-of-stock">OUT OF STOCK</span>
                                 <% } %>
 
-                                <div style="display: flex; gap: 10px; align-items: stretch;">
+                                <div class="product-card-actions">
                                     <a href="${pageContext.request.contextPath}/buyer/product-details?id=<%= p.getId() %>"
-                                       class="seller-secondary-button"
-                                       style="flex: 1; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0.65rem 0.6rem; font-size: 0.72rem;">
+                                       class="btn-card-action btn-secondary">
                                         View Details
                                     </a>
                                     <% if (inStock) { %>
-                                        <form action="${pageContext.request.contextPath}/buyer/cart" method="post" style="flex: 1; display: flex;">
+                                        <form action="${pageContext.request.contextPath}/buyer/cart" method="post" style="flex: 1; display: flex; margin: 0;">
                                             <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                             <input type="hidden" name="action" value="add">
                                             <input type="hidden" name="productId" value="<%= p.getId() %>">
                                             <input type="hidden" name="quantity" value="1">
                                             <input type="hidden" name="redirect" value="marketplace">
-                                            <button type="submit" class="seller-primary-button" style="flex: 1; padding: 0.65rem 0.6rem; font-size: 0.72rem; white-space: nowrap;">
+                                            <button type="submit" class="btn-card-action btn-primary" style="width: 100%;">
                                                 + Add to Cart
                                             </button>
                                         </form>

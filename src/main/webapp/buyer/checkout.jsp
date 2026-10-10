@@ -150,45 +150,45 @@
 
                 <!-- Buyer Details & Place Order -->
                 <div style="flex: 1.2; min-width: 280px;">
-                    <div class="seller-stat-card" style="padding: 1.8rem;">
+                    <div class="seller-stat-card" style="padding: 2rem;">
                         <span class="eyebrow">BUYER & SHIPPING</span>
-                        <h3 style="font-size: 1.2rem; margin: 0.3rem 0 1rem;">Customer Info</h3>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0.3rem 0 1.2rem;">Customer Info</h3>
 
-                        <div style="background: #fafafa; border: 1.5px solid #eee; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.88rem;">
-                            <div style="margin-bottom: 0.4rem;">
-                                <span style="color: #666; font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700;">Account Name</span>
-                                <strong><%= HtmlUtil.escape(user.getName()) %></strong>
+                        <div style="background: var(--bg-surface-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            <div style="margin-bottom: 0.6rem;">
+                                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700;">Account Name</span>
+                                <strong style="color: var(--text-main);"><%= HtmlUtil.escape(user.getName()) %></strong>
                             </div>
-                            <div style="margin-bottom: 0.4rem;">
-                                <span style="color: #666; font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700;">Email Address</span>
-                                <span><%= HtmlUtil.escape(user.getEmail()) %></span>
+                            <div style="margin-bottom: 0.6rem;">
+                                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700;">Email Address</span>
+                                <span style="color: var(--text-body);"><%= HtmlUtil.escape(user.getEmail()) %></span>
                             </div>
                             <div>
-                                <span style="color: #666; font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700;">Account Type</span>
-                                <span class="category-chip" style="font-size: 0.7rem; padding: 2px 6px;">BUYER VERIFIED</span>
+                                <span style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; display: block; font-weight: 700; margin-bottom: 4px;">Account Type</span>
+                                <span class="category-chip" style="font-size: 0.72rem; padding: 2px 8px;">BUYER VERIFIED</span>
                             </div>
                         </div>
 
-                        <div style="border-top: 1.5px solid #eee; padding-top: 1rem; margin-bottom: 1.2rem;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                                <span style="color: #666;">Total Items</span>
-                                <strong><%= cartItems.size() %> items</strong>
+                        <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.92rem;">
+                                <span style="color: var(--text-muted);">Total Items</span>
+                                <strong style="color: var(--text-main);"><%= cartItems.size() %> items</strong>
                             </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.9rem;">
-                                <span style="color: #666;">Delivery</span>
-                                <strong style="color: #2e7d32;">FREE</strong>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.92rem;">
+                                <span style="color: var(--text-muted);">Delivery</span>
+                                <strong style="color: var(--success);">FREE</strong>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #000; padding-top: 0.8rem;">
-                                <span style="font-weight: 800; font-size: 1rem; text-transform: uppercase;">Total to Pay</span>
-                                <span style="font-size: 1.8rem; font-weight: 900; color: #000;">₹<%= cartTotal %></span>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--border); padding-top: 1rem;">
+                                <span style="font-weight: 800; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Total to Pay</span>
+                                <span style="font-size: 2rem; font-weight: 900; color: var(--primary); letter-spacing: -0.5px;">₹<%= cartTotal %></span>
                             </div>
                         </div>
 
-                        <form action="${pageContext.request.contextPath}/buyer/place-order" method="post">
+                        <form action="${pageContext.request.contextPath}/buyer/place-order" method="post" style="margin: 0;">
                             <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                             <button type="submit" 
                                     class="primary-button" 
-                                    style="width: 100%; padding: 1rem; font-size: 1rem; box-shadow: 4px 4px 0px #000;"
+                                    style="width: 100%; padding: 1rem; font-size: 1rem;"
                                     onclick="this.disabled=true; this.innerText='Processing Order...'; this.form.submit();">
                                 Place Order Now (₹<%= cartTotal %>)
                             </button>

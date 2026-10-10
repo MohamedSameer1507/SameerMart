@@ -162,18 +162,18 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                     <!-- Order Status Breakdown Chart -->
-                    <div class="products-panel" style="padding: 1.5rem; background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000;">
-                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Orders by Status</h3>
-                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Distribution of customer order states</p>
+                    <div class="products-panel" style="padding: 1.8rem;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Orders by Status</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Distribution of customer order states</p>
                         <div style="height: 250px; position: relative;">
                             <canvas id="orderStatusChart"></canvas>
                         </div>
                     </div>
 
                     <!-- Top Selling Products Chart -->
-                    <div class="products-panel" style="padding: 1.5rem; background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000;">
-                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Top Products by Units Sold</h3>
-                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Highest velocity items in catalog</p>
+                    <div class="products-panel" style="padding: 1.8rem;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Top Products by Units Sold</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Highest velocity items in catalog</p>
                         <div style="height: 250px; position: relative;">
                             <canvas id="topProductsChart"></canvas>
                         </div>
@@ -181,7 +181,7 @@
                 </div>
 
                 <!-- Top Products Leaderboard Table -->
-                <div class="products-panel" style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; margin-bottom: 2rem;">
+                <div class="products-panel" style="margin-bottom: 2rem;">
                     <div class="products-panel-header">
                         <div>
                             <h3>Top-Selling Products Leaderboard</h3>

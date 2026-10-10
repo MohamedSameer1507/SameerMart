@@ -76,13 +76,13 @@
             </section>
 
             <% if (orders == null || orders.isEmpty()) { %>
-                <div class="empty-state" style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; padding: 4rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <div class="empty-state">
+                    <div style="font-size: 3.5rem; margin-bottom: 1.2rem;">📦</div>
                     <h2>No Orders Placed Yet</h2>
-                    <p style="color: #666; max-width: 420px; margin: 0.5rem auto 1.5rem;">
+                    <p>
                         You haven't placed any orders yet. Visit the marketplace to find fresh produce and products.
                     </p>
-                    <a href="${pageContext.request.contextPath}/buyer/marketplace" class="primary-button" style="display: inline-block; max-width: 240px; padding: 0.85rem 1.5rem;">
+                    <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-primary-button">
                         Start Shopping
                     </a>
                 </div>
@@ -90,18 +90,18 @@
                 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <% for (Order order : orders) { %>
                         <div class="products-panel" style="margin-bottom: 0;">
-                            <div class="products-panel-header" style="background: #fafafa; border-bottom: 2px solid #000; padding: 1.2rem 1.5rem;">
+                            <div class="products-panel-header" style="background: var(--bg-surface-alt); border-bottom: 1px solid var(--border); padding: 1.2rem 1.6rem;">
                                 <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
                                     <div>
-                                        <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Order Placed</span>
-                                        <strong><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Recently" %></strong>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Order Placed</span>
+                                        <strong style="color: var(--text-main);"><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Recently" %></strong>
                                     </div>
                                     <div>
-                                        <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Total Amount</span>
-                                        <strong style="color: #000;">₹<%= order.getTotalAmount() %></strong>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Total Amount</span>
+                                        <strong style="color: var(--primary); font-size: 1.1rem;">₹<%= order.getTotalAmount() %></strong>
                                     </div>
                                     <div>
-                                        <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Status</span>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px; margin-bottom: 3px;">Status</span>
                                         <%
                                             String oStatus = order.getStatus() != null ? order.getStatus().trim().toUpperCase() : "CONFIRMED";
                                             String oStatusClass = "status-" + oStatus.toLowerCase();
@@ -110,8 +110,8 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <a href="${pageContext.request.contextPath}/buyer/order?id=<%= order.getId() %>" style="font-size: 0.9rem; font-weight: 800; color: #000; text-decoration: underline;">
-                                        Order #<%= order.getId() %> →
+                                    <a href="${pageContext.request.contextPath}/buyer/order?id=<%= order.getId() %>" class="btn-card-action btn-secondary" style="font-size: 0.82rem; padding: 6px 14px;">
+                                        View Details #<%= order.getId() %> →
                                     </a>
                                 </div>
                             </div>

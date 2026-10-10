@@ -73,22 +73,22 @@
                 </p>
 
                 <% if (order != null) { %>
-                    <div style="display: inline-flex; gap: 2rem; background: #fafafa; border: 2px solid #000; padding: 1rem 2rem; margin-bottom: 1.5rem; text-align: left; flex-wrap: wrap;">
+                    <div style="display: inline-flex; gap: 2rem; background: var(--bg-surface-alt); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.2rem 2.2rem; margin-bottom: 1.5rem; text-align: left; flex-wrap: wrap;">
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Order Reference</span>
-                            <strong style="font-size: 1.1rem;">#<%= order.getId() %></strong>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Order Reference</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">#<%= order.getId() %></strong>
                         </div>
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Order Date</span>
-                            <span><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Today" %></span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Order Date</span>
+                            <span style="color: var(--text-body);"><%= order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "Today" %></span>
                         </div>
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Status</span>
-                            <span class="category-chip" style="background: #000; color: #fff;"><%= HtmlUtil.escape(order.getStatus()) %></span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px; margin-bottom: 3px;">Status</span>
+                            <span class="status-badge status-confirmed"><%= HtmlUtil.escape(order.getStatus()) %></span>
                         </div>
                         <div>
-                            <span style="font-size: 0.72rem; color: #666; text-transform: uppercase; font-weight: 700; display: block;">Total Paid</span>
-                            <strong style="font-size: 1.2rem; color: #000;">₹<%= order.getTotalAmount() %></strong>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; letter-spacing: 0.5px;">Total Paid</span>
+                            <strong style="font-size: 1.25rem; color: var(--primary);">₹<%= order.getTotalAmount() %></strong>
                         </div>
                     </div>
                 <% } %>

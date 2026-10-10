@@ -89,13 +89,13 @@
             </section>
 
             <% if (wishlistItems == null || wishlistItems.isEmpty()) { %>
-                <div class="empty-state" style="background: #fff; border: 2px solid #000; box-shadow: 4px 4px 0px #000; padding: 4rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">❤️</div>
+                <div class="empty-state">
+                    <div style="font-size: 3.5rem; margin-bottom: 1.2rem;">❤️</div>
                     <h2>Your Wishlist is Empty</h2>
-                    <p style="color: #666; max-width: 420px; margin: 0.5rem auto 1.5rem;">
+                    <p>
                         You haven't saved any items to your wishlist yet. Discover products in our marketplace!
                     </p>
-                    <a href="${pageContext.request.contextPath}/buyer/marketplace" class="primary-button" style="display: inline-block; max-width: 240px; padding: 0.85rem 1.5rem;">
+                    <a href="${pageContext.request.contextPath}/buyer/marketplace" class="seller-primary-button">
                         Browse Marketplace
                     </a>
                 </div>
