@@ -283,7 +283,7 @@
                                             } catch (Throwable t) {
                                                 pImg = "default-product.svg";
                                             }
-                                            String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
+                                            String imgSrc = HtmlUtil.resolveImageUrl(pImg, request.getContextPath());
                                     %>
                                         <tr>
                                             <td style="width: 50px;">

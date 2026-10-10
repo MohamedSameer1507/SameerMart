@@ -1,14 +1,20 @@
 package com.sameer.sameermart.config;
 
+import com.sameer.sameermart.dao.ProductDAO;
 import com.sameer.sameermart.dao.UserDAO;
+import com.sameer.sameermart.model.Product;
 import com.sameer.sameermart.model.User;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,6 +205,116 @@ public class DatabaseContextListener implements ServletContextListener {
                         "ADMIN"
                 ));
                 logger.info("Default admin user created: {}", adminEmail);
+            }
+
+            // Seed default seller account if not exists
+            String sellerEmail = "seller@sameermart.com";
+            User defaultSeller = userDAO.findByEmail(sellerEmail);
+            if (defaultSeller == null) {
+                userDAO.registerUser(new User(
+                        "Sameer Agro Merchant",
+                        sellerEmail,
+                        "seller123",
+                        "SELLER"
+                ));
+                defaultSeller = userDAO.findByEmail(sellerEmail);
+                logger.info("Default seller user created: {}", sellerEmail);
+            }
+
+            // Seed default buyer account if not exists
+            String buyerEmail = "buyer@sameermart.com";
+            User defaultBuyer = userDAO.findByEmail(buyerEmail);
+            if (defaultBuyer == null) {
+                userDAO.registerUser(new User(
+                        "Sameer Verified Buyer",
+                        buyerEmail,
+                        "buyer123",
+                        "BUYER"
+                ));
+                defaultBuyer = userDAO.findByEmail(buyerEmail);
+                logger.info("Default buyer user created: {}", buyerEmail);
+            }
+
+            // Seed marketplace products if catalog is empty
+            ProductDAO productDAO = new ProductDAO();
+            if (productDAO.findAll().isEmpty() && defaultSeller != null) {
+                int sellerId = defaultSeller.getId();
+                List<Product> seedProducts = List.of(
+                        new Product(sellerId, "Salem Golden Turmeric Powder", "Pure, organically sourced Salem turmeric with high curcumin content (3.5%+). Farm fresh aroma, ideal for everyday culinary and wellness use.", "Spices", new BigDecimal("180.00"), 50, "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Malabar Whole Black Pepper", "Tellicherry grade bold black pepper harvested from Kerala. Sun-dried, fragrant, and intensely pungent.", "Spices", new BigDecimal("450.00"), 35, "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Royal Aged Basmati Rice", "Traditional long-grain Basmati rice aged for 24 months. Delicate fragrance, non-sticky texture, doubles in length upon cooking.", "Grains", new BigDecimal("145.00"), 80, "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Organic Khapli Emmer Wheat", "Ancient heirloom Emmer wheat rich in dietary fiber, low glycemic index, and ideal for healthy rotis.", "Grains", new BigDecimal("95.00"), 60, "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Unpolished Organic Toor Dal", "Naturally unpolished pigeon peas retaining natural protein and essential minerals. No artificial polishing or chemical additives.", "Pulses", new BigDecimal("165.00"), 45, "https://images.unsplash.com/photo-1585994192701-499313837943?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Premium Green Moong Whole", "High-protein whole green gram perfect for sprouting, soups, and traditional curries. Farm-cleaned and pesticide-free.", "Pulses", new BigDecimal("135.00"), 40, "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Crisp Kashmiri Red Apples", "Grade-A crisp red apples from the high-altitude orchards of Kashmir. Sweet, juicy, and naturally tree-ripened.", "Fruits", new BigDecimal("220.00"), 30, "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Ratnagiri Alphonso Mangoes", "Original Hapus mangoes from the coastal orchards of Ratnagiri. Rich saffron pulp with sweet floral aroma.", "Fruits", new BigDecimal("750.00"), 25, "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Farm-Fresh Organic Potatoes", "Freshly harvested earthy organic potatoes from local family farms. Firm skin, excellent starchy texture.", "Vegetables", new BigDecimal("42.00"), 100, "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Fresh Red Country Onions", "Pungent and crisp sun-cured country red onions with thin skin. Delivers authentic deep flavor to daily cooking.", "Vegetables", new BigDecimal("55.00"), 90, "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Organic Black Sesame Seeds", "Nutrient-dense raw black sesame seeds loaded with calcium and healthy fats. Sourced directly from certified organic growers.", "Oilseeds", new BigDecimal("280.00"), 35, "https://images.unsplash.com/photo-1508061257976-f7536b19aa18?w=600&auto=format&fit=crop&q=80"),
+                        new Product(sellerId, "Cold-Pressed Yellow Mustard Seeds", "Premium quality pungent small yellow mustard seeds for seasoning, pickling, and oil pressing.", "Oilseeds", new BigDecimal("130.00"), 50, "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&auto=format&fit=crop&q=80")
+                );
+
+                for (Product p : seedProducts) {
+                    productDAO.addProduct(p);
+                }
+                logger.info("Marketplace catalog initialized with {} seed products across all categories", seedProducts.size());
+
+                // Seed completed order and reviews for default buyer
+                if (defaultBuyer != null) {
+                    List<Product> seededList = productDAO.findAll();
+                    if (!seededList.isEmpty()) {
+                        try (PreparedStatement orderStmt = connection.prepareStatement(
+                                "INSERT INTO orders (buyer_id, total_amount, status) VALUES (?, ?, 'DELIVERED')",
+                                PreparedStatement.RETURN_GENERATED_KEYS)) {
+                            orderStmt.setInt(1, defaultBuyer.getId());
+                            orderStmt.setBigDecimal(2, new BigDecimal("695.00"));
+                            orderStmt.executeUpdate();
+                            try (ResultSet genKeys = orderStmt.getGeneratedKeys()) {
+                                if (genKeys.next()) {
+                                    int seedOrderId = genKeys.getInt(1);
+                                    try (PreparedStatement itemStmt = connection.prepareStatement(
+                                            "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)")) {
+                                        itemStmt.setInt(1, seedOrderId);
+                                        itemStmt.setInt(2, seededList.get(0).getId());
+                                        itemStmt.setInt(3, 1);
+                                        itemStmt.setBigDecimal(4, seededList.get(0).getPrice());
+                                        itemStmt.addBatch();
+
+                                        if (seededList.size() > 2) {
+                                            itemStmt.setInt(1, seedOrderId);
+                                            itemStmt.setInt(2, seededList.get(2).getId());
+                                            itemStmt.setInt(3, 2);
+                                            itemStmt.setBigDecimal(4, seededList.get(2).getPrice());
+                                            itemStmt.addBatch();
+                                        }
+                                        itemStmt.executeBatch();
+                                    }
+
+                                    // Add verified customer reviews
+                                    try (PreparedStatement revStmt = connection.prepareStatement(
+                                            "INSERT INTO reviews (product_id, buyer_id, rating, review_text) VALUES (?, ?, ?, ?)")) {
+                                        revStmt.setInt(1, seededList.get(0).getId());
+                                        revStmt.setInt(2, defaultBuyer.getId());
+                                        revStmt.setInt(3, 5);
+                                        revStmt.setString(4, "Outstanding quality! Fresh aroma and authentic golden color. Fast fulfillment.");
+                                        revStmt.addBatch();
+
+                                        if (seededList.size() > 2) {
+                                            revStmt.setInt(1, seededList.get(2).getId());
+                                            revStmt.setInt(2, defaultBuyer.getId());
+                                            revStmt.setInt(3, 5);
+                                            revStmt.setString(4, "The aroma while cooking this Basmati is pure luxury. Extra long grains!");
+                                            revStmt.addBatch();
+                                        }
+                                        revStmt.executeBatch();
+                                    }
+                                }
+                            }
+                        } catch (SQLException revEx) {
+                            logger.warn("Could not insert seed reviews: {}", revEx.getMessage());
+                        }
+                    }
+                }
             }
 
             logger.info("H2 DATABASE INITIALIZED - Users, Products, Cart, Orders, Reviews tables ready");

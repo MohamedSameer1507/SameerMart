@@ -117,7 +117,7 @@
                                                 pImg = prod.getImageUrl().trim();
                                             }
                                         } catch (Throwable ignored) {}
-                                        String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
+                                        String imgSrc = HtmlUtil.resolveImageUrl(pImg, request.getContextPath());
                                         String prodName = prod != null ? prod.getName() : "Product #" + item.getProductId();
                                         BigDecimal unitPrice = prod != null ? prod.getPrice() : BigDecimal.ZERO;
                                     %>

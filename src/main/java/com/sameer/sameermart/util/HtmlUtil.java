@@ -43,4 +43,26 @@ public class HtmlUtil {
         }
         return escaped.toString();
     }
+
+    /**
+     * Safely resolves a product image URL for rendering in HTML views.
+     *
+     * @param imageUrl Raw image URL or filename stored in the database
+     * @param contextPath Web application servlet context path (e.g. "/sameermart")
+     * @return Fully resolved web path or external HTTP/HTTPS URL
+     */
+    public static String resolveImageUrl(String imageUrl, String contextPath) {
+        String base = (contextPath == null) ? "" : contextPath;
+        if (imageUrl == null || imageUrl.trim().isEmpty() || "default-product.svg".equalsIgnoreCase(imageUrl.trim())) {
+            return base + "/images/default-product.svg";
+        }
+        String trimmed = imageUrl.trim();
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return trimmed;
+        }
+        if (trimmed.startsWith("default-")) {
+            return base + "/images/" + trimmed;
+        }
+        return base + "/images/products/" + trimmed;
+    }
 }

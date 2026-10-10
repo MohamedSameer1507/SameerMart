@@ -126,7 +126,7 @@
                                     Product p = item.getProduct();
                                     String pName = p != null ? p.getName() : "Product #" + item.getProductId();
                                     String pImg = (p != null && p.getImageUrl() != null) ? p.getImageUrl() : "default-product.svg";
-                                    String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
+                                    String imgSrc = HtmlUtil.resolveImageUrl(pImg, request.getContextPath());
                             %>
                                 <tr>
                                     <td>

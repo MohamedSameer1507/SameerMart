@@ -90,7 +90,7 @@
             pImg = product.getImageUrl().trim();
         }
     } catch (Throwable ignored) {}
-    String imgSrc = pImg.startsWith("default-") ? request.getContextPath() + "/images/" + pImg : request.getContextPath() + "/images/products/" + pImg;
+    String imgSrc = HtmlUtil.resolveImageUrl(pImg, request.getContextPath());
     boolean inStock = product.getQuantity() > 0;
 %>
 

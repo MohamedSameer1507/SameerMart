@@ -124,9 +124,7 @@
                                     if (pImg == null || pImg.trim().isEmpty()) {
                                         pImg = "default-product.svg";
                                     }
-                                    String imgSrc = pImg.startsWith("default-") 
-                                            ? request.getContextPath() + "/images/" + pImg 
-                                            : request.getContextPath() + "/images/products/" + pImg;
+                                    String imgSrc = HtmlUtil.resolveImageUrl(pImg, request.getContextPath());
                                     String prodName = item.getProductName() != null ? item.getProductName() : "Product #" + item.getProductId();
                                     BigDecimal price = item.getProductPrice() != null ? item.getProductPrice() : BigDecimal.ZERO;
                                     boolean inStock = item.isInStock();
