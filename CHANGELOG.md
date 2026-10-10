@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-10-10
+
+### Added
+- **Full Controller Test Coverage (244 Tests Total)**:
+  - Unit tests for remaining servlets (`LogoutServletTest`, `MarketplaceServletTest`, `SellerOrderServletTest`, `ProductImageServletTest`), bringing automated test count from 226 to **244 passing tests across 40 test classes** with 100% controller coverage.
+  - Path traversal and malicious input rejection verification in `ProductImageServletTest`.
+  - Seller order metrics and access authorization verification in `SellerOrderServletTest`.
+- **Production Containerization**:
+  - Multi-stage `Dockerfile` with Alpine Maven build and Tomcat 9 Temurin JRE runtime.
+  - Automatic cloud provider dynamic `$PORT` binding support (Render, Railway, Heroku).
+  - Quarantined persistent upload directory creation (`/var/sameermart/uploads`).
+  - `.dockerignore` to streamline container build contexts.
+- **Continuous Integration Hardening**:
+  - Expanded GitHub Actions workflow trigger branches to include `antigravity/**` and `feature/**`.
+
+### Changed
+- **Logging Hygiene & Audit Compliance**:
+  - Replaced all legacy `printStackTrace()` and `System.err.println()` statements across all DAOs (`CartDAO`, `OrderDAO`, `ProductDAO`, `ReviewDAO`, `UserDAO`) and servlets (`AddProductServlet`, `EditProductServlet`, `OrderServlet`, `ReviewServlet`) with structured SLF4J parameterized logging.
+  - Updated `AuthFilter` lifecycle logging to use SLF4J logger.
+- **Local Database Compatibility**:
+  - Resolved default H2 password configuration in `DatabaseConfig` for local standalone Tomcat 9 server.
+
+---
+
 ## [1.1.0] - 2026-10-09
 
 ### Added

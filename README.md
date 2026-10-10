@@ -1,6 +1,6 @@
 # SameerMart — Multi-Vendor E-Commerce Platform
 
-[![Build & Test Status](https://img.shields.io/badge/Tests-226%20Passing-brightgreen.svg)](#-automated-testing-suite)
+[![Build & Test Status](https://img.shields.io/badge/Tests-244%20Passing-brightgreen.svg)](#-automated-testing-suite)
 [![Java Version](https://img.shields.io/badge/Java-17%20LTS-orange.svg)](https://openjdk.org/)
 [![Servlet Spec](https://img.shields.io/badge/Servlet-4.0%20(Tomcat%209)-blue.svg)](https://tomcat.apache.org/)
 [![Test Engine](https://img.shields.io/badge/Testing-JUnit%205%20Jupiter-green.svg)](https://junit.org/junit5/)
@@ -114,7 +114,7 @@ flowchart TD
 | **Logging & MDC** | SLF4J & Logback Classic | `2.0.16` / `1.5.12` | Structured logging with request tracing |
 | **AI Assistant** | Google Gemini API | `Flash-Lite 3.1` | Asynchronous generative support chatbot |
 | **Data Visualization** | Chart.js | `4.4.1` | Interactive doughnut & bar sales charts |
-| **Testing Engine** | JUnit 5 Jupiter & Mockito | `5.10.2` / `5.12.0` | 226 unit, integration, and mocking tests |
+| **Testing Engine** | JUnit 5 Jupiter & Mockito | `5.10.2` / `5.12.0` | 244 unit, integration, and mocking tests |
 | **Static Analysis** | Checkstyle & SpotBugs | `3.4.0` / `4.8.6.4` | Code style enforcement & bytecode bug audit |
 
 ---
@@ -193,7 +193,7 @@ cd SameerMart
 ```bash
 mvn clean verify
 ```
-*Expected output: `BUILD SUCCESS` with **226 tests passing**, 0 Checkstyle violations, 0 SpotBugs bugs.*
+*Expected output: `BUILD SUCCESS` with **244 tests passing**, 0 Checkstyle violations, 0 SpotBugs bugs.*
 
 ### 3. Deploying to Standalone Tomcat 9
 1. Package the WAR:
@@ -206,6 +206,17 @@ mvn clean verify
    - Linux/macOS: `bin/startup.sh`
 4. Access the platform at: `http://localhost:8080/SameerMart`
 
+### 4. Running with Docker Container
+A production multi-stage `Dockerfile` is included:
+```bash
+# Build the container image
+docker build -t sameermart .
+
+# Run container on port 8080
+docker run -d -p 8080:8080 --name sameermart-app sameermart
+```
+The application is automatically deployed at root context (`http://localhost:8080/`) with persistent upload volume directory.
+
 ---
 
 ## 🧪 Automated Testing Suite
@@ -216,12 +227,12 @@ SameerMart enforces a zero-regression policy. The suite executes against an isol
 mvn test
 ```
 
-### Suite Breakdown (226 Tests across 36 Test Classes):
+### Suite Breakdown (244 Tests across 40 Test Classes):
 - **Data Access Tier (44 tests)**: `UserDAOTest`, `ProductDAOTest`, `CartDAOTest`, `OrderDAOTest`, `ReviewDAOTest`, `WishlistDAOTest`, `MockChatProviderTest`.
 - **Domain & Rules (5 tests)**: `BusinessRuleTest`.
 - **Service Tier (44 tests)**: `AuthServiceTest`, `ProductServiceTest`, `CartServiceTest`, `OrderServiceTest`, `ReviewServiceTest`, `WishlistServiceTest`, `ChatServiceTest`.
 - **Security & Filters (16 tests)**: `SecurityTest`, `AuthFilterTest`, `RequestIdFilterTest`, `EncodingFilterTest`.
-- **Controllers & APIs (111 tests)**: `LoginServletTest`, `RegisterServletTest`, `CartServletTest`, `OrderServletTest`, `OrderStatusServletTest`, `ProductDetailsServletTest`, `EditProductServletTest`, `DeleteProductServletTest`, `AdminProductStatusServletTest`, `ReviewServletTest`, `WishlistServletTest`, `HealthServletTest`, `ChatServletTest`, `ProductApiServletTest`, `CartApiServletTest`, `OrderApiServletTest`.
+- **Controllers & APIs (129 tests)**: `LoginServletTest`, `LogoutServletTest`, `RegisterServletTest`, `CartServletTest`, `OrderServletTest`, `OrderStatusServletTest`, `SellerOrderServletTest`, `MarketplaceServletTest`, `ProductDetailsServletTest`, `ProductImageServletTest`, `EditProductServletTest`, `DeleteProductServletTest`, `AdminProductStatusServletTest`, `ReviewServletTest`, `WishlistServletTest`, `HealthServletTest`, `ChatServletTest`, `ProductApiServletTest`, `CartApiServletTest`, `OrderApiServletTest`.
 - **End-to-End Integration (6 tests)**: `SameerMartFlowTest`.
 
 See full inventory in [docs/testing.md](docs/testing.md).

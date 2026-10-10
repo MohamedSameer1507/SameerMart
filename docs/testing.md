@@ -10,7 +10,7 @@ Prepared for the **Anna University R2025 Semester 3 Java Capstone Review (Octobe
 
 ### Automated Test Suite Execution
 ```bash
-# Run all 226 unit and integration tests under JUnit 5 Jupiter
+# Run all 244 unit and integration tests under JUnit 5 Jupiter
 mvn clean test
 
 # Run tests, static analysis (Checkstyle + SpotBugs), and package WAR
@@ -38,19 +38,19 @@ All automated tests execute against an isolated **in-memory H2 database** (`jdbc
 
 | Metric | Result | Compliance Target | Status |
 | :--- | :---: | :---: | :---: |
-| **Total Test Classes** | **36** | ≥ 20 | **PASS** |
-| **Total Automated Tests** | **226** | ≥ 113 | **PASS (100% Increase)** |
+| **Total Test Classes** | **40** | ≥ 20 | **PASS** |
+| **Total Automated Tests** | **244** | ≥ 113 | **PASS (115% Increase)** |
 | **Failures** | **0** | 0 | **PASS** |
 | **Errors** | **0** | 0 | **PASS** |
 | **Skipped** | **0** | 0 | **PASS** |
 | **Test Framework** | **JUnit 5 (Jupiter 5.10.2)** | JUnit 5 | **PASS** |
 | **Checkstyle Violations** | **0** | 0 | **PASS** |
 | **SpotBugs Bugs / Warnings** | **0** | 0 | **PASS** |
-| **Average Suite Duration** | **~22.2 seconds** | < 60s | **PASS** |
+| **Average Suite Duration** | **~19.0 seconds** | < 60s | **PASS** |
 
 ---
 
-## 3. Complete Test Inventory (226 Tests across 36 Classes)
+## 3. Complete Test Inventory (244 Tests across 40 Classes)
 
 ### 3.1 Data Access Tier (DAO Tests — 44 Tests)
 All DAO tests run against real in-memory SQL tables via HikariCP, verifying connection lifecycle, query execution, constraint handling, and transactions.
@@ -91,15 +91,19 @@ Validates business logic decoupling, custom domain exceptions (`ValidationExcept
 | `RequestIdFilterTest` | 2 | `X-Request-Id` generation, injection into SLF4J MDC, propagation in response header, CRLF injection sanitization (`^[A-Za-z0-9_-]{1,64}$`). |
 | `EncodingFilterTest` | 1 | UTF-8 request and response character encoding enforcement across all servlets. |
 
-### 3.5 Controller & Servlet Tier (111 Tests)
+### 3.5 Controller & Servlet Tier (129 Tests)
 | Class | Tests | Key Capabilities Verified |
 | :--- | :---: | :--- |
 | `LoginServletTest` | 9 | GET login page redirect, missing parameter handling, invalid email/password handling, session fixation mitigation (`changeSessionId`), role-based redirection (BUYER &rarr; `/buyer/marketplace`, SELLER &rarr; `/seller/dashboard.jsp`, ADMIN &rarr; `/admin/dashboard.jsp`), sliding-window brute-force rate limiting (locks after 5 failures for 5 minutes), counter reset on successful authentication. |
+| `LogoutServletTest` | 3 | Session invalidation, unauthenticated session safety, redirect to login page with logout success notice, doPost-to-doGet delegation. |
 | `RegisterServletTest` | 7 | Public role whitelist enforcement (rejects forged ADMIN registrations), email format validation, password length checks, duplicate email conflict handling. |
+| `MarketplaceServletTest` | 3 | Marketplace catalog loading, request attribute population, forwarding to `/buyer/marketplace.jsp`, DAO exception translation. |
 | `CartServletTest` | 7 | Role verification (buyers only), quantity bounds checking, add/update/remove items, CSRF validation. |
 | `OrderServletTest` | 9 | Empty cart rejection, buyer checkout, ownership protection (buyers cannot inspect other buyers' orders), CSRF validation. |
 | `OrderStatusServletTest` | 12 | State transition validation (`CONFIRMED` &rarr; `SHIPPED` &rarr; `DELIVERED`), seller item authorization, illegal state transition rejection (HTTP 409 Conflict), cancellation rules, CSRF validation. |
+| `SellerOrderServletTest` | 5 | Seller authentication requirement, non-seller role rejection, seller metric aggregation (orders, revenue, items), forwarding to `/seller/orders.jsp`. |
 | `ProductDetailsServletTest` | 7 | Product ID validation, inactive product hiding from buyers, review summary population, rating calculation. |
+| `ProductImageServletTest` | 7 | Path traversal blocking (`..`), illegal character rejection, upload directory file streaming, WAR fallback streaming, missing image 404 handling. |
 | `EditProductServletTest` | 7 | Seller ownership enforcement (sellers cannot edit competitors' products), pricing/stock bounds, CSRF token check. |
 | `DeleteProductServletTest` | 5 | Seller ownership enforcement (sellers cannot delete competitors' products), CSRF token check. |
 | `AdminProductStatusServletTest` | 4 | Role enforcement (non-admin receives HTTP 403 Forbidden), product activation/deactivation toggling. |
