@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+target
+data
+*.mv.db
+*.trace.db
+*.log
+.env
+.env.*
+!.env.example
+cloudflared.exe
